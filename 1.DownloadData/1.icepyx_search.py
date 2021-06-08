@@ -1,4 +1,4 @@
-from icepyx import is2class as ipd
+import icepyx as ipx
 #from icepyx import icesat2data as ipd
 import os
 import shutil
@@ -12,14 +12,14 @@ polygon file: A string containing the full file path and name.
 date_range = the date range for which you would like to search for results. Must be formatted as a set of 'YYYY-MM-DD' strings.
 '''
 #bounding box
-short_name = 'ATL08'
-# Bermuda
-#spatial_extent = [-65, 32, -64.5, 32.5]
-# Puerto Rico
-spatial_extent = [-81.513, 25.078, -80.885, 25.928]
-date_range = ['2018-01-01','2021-01-21']
+short_name = 'ATL03'
+
+# Cuba
+# Be aware of the order of the bounding box coordinates here for the updated icepyx version
+spatial_extent = [-82.14258, 21.60278, -81.47461, 22.18276]
+date_range = ['2021-02-05','2021-02-07']
 # default version is most recent if left blank
-version='003'
+version='004'
 start_time='00:00:00'
 end_time='23:59:59'
 
@@ -29,7 +29,7 @@ end_time='23:59:59'
 #spatial_extent = './supporting_files/data-access_PineIsland/glims_polygons.kml'
 #date_range = ['2019-02-22','2019-02-28']
 
-region_a = ipd.Icesat2Data(short_name, spatial_extent, date_range, start_time, end_time, version)
+region_a = ipx.Query(short_name, spatial_extent, date_range)
 
 
 print('\n print avail granules = ', region_a.avail_granules())
@@ -39,8 +39,8 @@ Cont = input("Continue...?")
 #Number = input("How many...?")
 if Cont == "yes":
     # EarthData credentials
-    earthdata_uid = 'nathanmthomas'
-    email = 'nathan.m.thomas@nasa.gov'
+    earthdata_uid = 'bhylee'
+    email = 'brianlee52@ucsb.edu'
     session=region_a.earthdata_login(earthdata_uid, email)
 
 
@@ -51,15 +51,15 @@ if Cont == "yes":
     #include_meta = 'Y'
 
 
-    region_a.build_reqconfig_params('download')#page_size=int(Number))
+#     region_a.build_reqconfig_params('download')#page_size=int(Number))
 
-    region_a.order_granules(session)
+#     region_a.order_granules(session)
 
-    print(region_a.avail_granules())
+#     print(region_a.avail_granules())
 
 
     #Must be empty
-    path = '/Users/nmthoma1/Documents/Research/ICESat2/MangroveHeight/ATL08/'
+    path = '/Users/brian.h.lee/Desktop/icesat/data/raw'
     region_a.download_granules(session, path)
 
     #Clean up Outputs folder by removing individual granule folders
