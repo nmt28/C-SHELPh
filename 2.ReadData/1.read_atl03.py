@@ -14,7 +14,7 @@ def OrthometricCorrection(lat, lon, Z, epsg):
     
     # transform WGS84 proj to local UTM
     myProj = Proj(epsg)
-    Y_utm, X_utm = myProj(latitude, longitude)
+    Y_utm, X_utm = myProj(lat, lon)
     
     return Y_utm, X_utm, Z_egm08
 
@@ -64,7 +64,10 @@ def main():
 
     latitude, longitude, photon_h = ReadATL03(args.input, args.laser)
     
-    lat_utm, lon_utm, h_utm = OrthometricCorrection(latitude, longitude, photon_h args.epsg)
+    lat_utm, lon_utm, h_utm = OrthometricCorrection(latitude, longitude, photon_h, args.epsg_num)
+    
+    plt.scatter(lat_utm, h_utm, s=0.1, alpha=0.1, c='black')
+    plt.show()
     
 if __name__ == '__main__':
     main()
