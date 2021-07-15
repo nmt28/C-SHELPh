@@ -264,6 +264,8 @@ def get_bath_height(binned_data, percentile, WSHeight, height_resolution):
     binned_data_bath = binned_data[(binned_data['photon_height'] < WSHeight - (height_resolution * 2))] # Filter out surface data that are two bins below median surface value calculated above
     grouped_data = binned_data_bath.groupby(['lat_bins'], group_keys=True)
     data_groups = dict(list(grouped_data))
+    
+    # Create a percentile threshold of photon counts in each grid, grouped by both x and y axes.
     count_threshold = np.percentile(binned_data.groupby(['lat_bins', 'height_bins']).size().reset_index().groupby('lat_bins')[[0]].max(), percentile)
     
     # Loop through groups and return average sea height
@@ -330,12 +332,12 @@ def main():
     parser.add_argument("-i", "--input", type=str, help="Specify the input ICESAT H5 file")
     parser.add_argument("-l", "--laser", type=str, help="Specify the ICESAT-2 laser number (1, 2 or 3)")
     parser.add_argument("-e", "--epsg_num", type=str, help="Specify the UTM Zone EPSG code (www.spatialreference.org)")
-    parser.add_argument("-wt", "--waterTemp", type=float, help="Specify the water temperature in degrees C")
     parser.add_argument("-loc", "--location", type=str, help="Specify the country to display")
-    parser.add_argument("-lr", "--lat_res", type=float, help="Specify the latitudinal resoltuion (normally 10)")
-    parser.add_argument("-hr", "--h_res", type=float, help="Specify the height resolution (normally 0.5)")
     parser.add_argument("-th", "--thresh", type=int, help="Specify the threshold percentage")
     parser.add_argument("-o", "--output", type=str, help="Specify the output location")
+    parser.add_argument("-lr", "--lat_res", type=float, default = 10, help="Specify the latitudinal resoltuion (normally 10)")
+    parser.add_argument("-hr", "--h_res", type=float, default = 0.5, help="Specify the height resolution (normally 0.5)")
+    parser.add_argument("-wt", "--waterTemp", type=float, default = 20, help="Specify the water temperature in degrees C")
     
     args = parser.parse_args()
     
