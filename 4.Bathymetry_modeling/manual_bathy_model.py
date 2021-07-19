@@ -286,14 +286,17 @@ def get_bath_height(binned_data, percentile, WSHeight, height_resolution):
     
     return bath_height
 
-def produce_figures(binned_data, bath_height, sea_height, scene_location, y_limit_top, y_limit_bottom, file_destination):
+def produce_figures(binned_data, bath_height, sea_height, scene_location, y_limit_top, y_limit_bottom, file_destination, percentile, data_path):
     
     # Create bins for latitude
     x_axis_bins = np.linspace(binned_data.latitude.min(), binned_data.latitude.max(), len(sea_height))
     
-    # Create new dataframes for median values
-    bath_median_df = pd.DataFrame({'x':x_axis_bins, 'y':bath_height})
-    
+    # Create new dataframes for median values  
+    bath_median_values = {'x' : x_axis_bins ,'y' : bath_height}
+    bath_median_df = pd.DataFrame.from_dict(bath_median_values, orient='index')
+    bath_median_df = bath_median_df.transpose()
+
+      
     # Create uniform sea surface based on median sea surface values and filter out surface breaching
     sea_height1 = [np.nanmedian(sea_height) if i == i else np.nan for i in sea_height]
     sea_median_df = pd.DataFrame({'x':x_axis_bins, 'y':sea_height1})
@@ -303,13 +306,15 @@ def produce_figures(binned_data, bath_height, sea_height, scene_location, y_limi
     
     # Plot raw points
 #     plt.scatter(x=binned_data.latitude, y = binned_data.photon_height, marker='o', lw=0, s=1, alpha = 0.8, c = 'yellow', label = 'Raw photon height')
-#     plt.scatter(x=binned_data.cor_latitude, y = binned_data.cor_photon_height, marker='o', lw=0, s=0.5, alpha = 0.3, c = 'black', label = 'Corrected photon height')
+    plt.scatter(x=binned_data.cor_latitude, y = binned_data.cor_photon_height, marker='o', lw=0, s=0.5, alpha = 0.3, c = 'black', label = 'Corrected photon height')
 
     # Plot median values
     plt.scatter(bath_median_df.x, bath_median_df.y, marker = 'o', c='r', alpha = 0.8, s = 5, label = 'Median bathymetry')
     plt.scatter(sea_median_df.x, sea_median_df.y, marker = 'o', c='b', alpha = 1, s = 0.5, label = 'Median sea surface')
 
-    plt.title('Icesat2 Bathymetry\n' + scene_location)
+    file = data_path[-39:-3]
+    
+    plt.title('Icesat2 Bathymetry\n' + scene_location + '\n' + file)
     plt.xlabel('Latitude')
     plt.ylabel('Photon H (in m)')
 
@@ -320,8 +325,10 @@ def produce_figures(binned_data, bath_height, sea_height, scene_location, y_limi
     
     timestr = time.strftime("%Y%m%d_%H%M%S")
     
+    
+    
     # Define where to save file
-    plt.savefig(file_destination + '/' + scene_location + '_' + timestr + '.png')
+    plt.savefig(file_destination + '/' + file + '_' + scene_location + '_' + str(percentile) + '_' + timestr + '.png')
     
     plt.show()
     
