@@ -425,7 +425,7 @@ def main():
     
     plt.close()
     
-    produce_figures(binned_data, bath_height, sea_height, args.location, 10, -20, args.output)
+    produce_figures(binned_data, bath_height, sea_height, args.location, 10, -20, args.output, args.thresh, args.input)
 
 if __name__ == '__main__':
     main()
