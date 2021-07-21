@@ -341,7 +341,7 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     
     
     # Define where to save file
-    plt.savefig(file_destination + '/' + file + '_' + str(percentile) + '_' + timestr + '.png')
+    plt.savefig(os.getcwd() + '/' + file + '_' + str(percentile) + '_' + timestr + '.png')
     
     plt.show()
     
@@ -353,10 +353,12 @@ def main():
     parser.add_argument("-i", "--input", type=str, help="Specify the input ICESAT H5 file")
     parser.add_argument("-l", "--laser", type=str, help="Specify the ICESAT-2 laser number (1, 2 or 3)")
     parser.add_argument("-th", "--thresh", type=int, help="Specify the threshold percentage")
-    parser.add_argument("-o", "--output", type=str, required = FALSE,help="Specify the output location")
+    parser.add_argument("-o", "--output", type=str, required = False, help="Specify the output location")
     parser.add_argument("-lr", "--lat_res", type=float, default = 10, help="Specify the latitudinal resoltuion (normally 10)")
     parser.add_argument("-hr", "--h_res", type=float, default = 0.5, help="Specify the height resolution (normally 0.5)")
     parser.add_argument("-wt", "--waterTemp", type=float, default = 20, help="Specify the water temperature in degrees C")
+    parser.add_argument("-slat", "--start_lat", type=float, required = False, help="Specify the start latitude")
+    parser.add_argument("-elat", "--end_lat", type=float, required = False, help="Specify the stop latitude")
     
     args = parser.parse_args()
     
@@ -378,9 +380,9 @@ def main():
     elif args.thresh == None:
         print('MISSING PERCENT THRESHOLD')
         os._exit(1)
-    elif args.output == None:
-        print('MISSING OUTPUT DIRECTORY')
-        os._exit(1)
+#     elif args.output == None:
+#         print('MISSING OUTPUT DIRECTORY')
+#         os._exit(1)
         
     latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id = ReadATL03(args.input, args.laser)
     
@@ -409,6 +411,11 @@ def main():
     dataset_sea1 = dataset_sea[(dataset_sea.confidence != 0)  & (dataset_sea.confidence != 1)]
     # Filter for elevation range
     dataset_sea1 = dataset_sea1[(dataset_sea1['photon_height'] > -40) & (dataset_sea1['photon_height'] < 5)]
+    
+    # Focus on specific latitude
+    if args.start_lat is not None:
+        dataset_sea1 = dataset_sea1[(dataset_sea1['latitude'] > args.start_lat) & (dataset_sea1['latitude'] < args.end_lat)]
+        else pass
     
     binned_data_sea = bin_data(dataset_sea1, args.lat_res, args.h_res)
     
