@@ -28,18 +28,8 @@ import argparse
 import os
 import subprocess
 import time 
-
-
-def OrthometricCorrection(lat, lon, Z, epsg):
-    # transform ellipsod (WGS84) height to orthometric height
-    transformerh = Transformer.from_crs("epsg:4326", "epsg:3855")
-    Y_egm08, X_egm08, Z_egm08 = transformerh.transform(lat, lon, Z)
-    
-    # transform WGS84 proj to local UTM
-    myProj = Proj(epsg)
-    X_utm, Y_utm = myProj(lon, lat)
-    
-    return Y_utm, X_utm, Z_egm08
+import utm
+import math
 
 def ReadATL03(h5_file, laser_num):
     # Read File
@@ -65,6 +55,29 @@ def ReadATL03(h5_file, laser_num):
     segment_id = f['/' + laser + '/geolocation/segment_id'][...,]
     
     return latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id
+
+# convert_wgs_to_utm function, see https://stackoverflow.com/a/40140326/4556479
+def convert_wgs_to_utm(lon: float, lat: float):
+    """Based on lat and lng, return best utm epsg-code"""
+    utm_band = str((math.floor((lon + 180) / 6 ) % 60) + 1)
+    if len(utm_band) == 1:
+        utm_band = '0'+utm_band
+    if lat >= 0:
+        epsg_code = 'epsg:326' + utm_band
+        return epsg_code
+    epsg_code = 'epsg:327' + utm_band
+    return epsg_code
+
+def OrthometricCorrection(lat, lon, Z, epsg):
+    # transform ellipsod (WGS84) height to orthometric height
+    transformerh = Transformer.from_crs("epsg:4326", "epsg:3855")
+    Y_egm08, X_egm08, Z_egm08 = transformerh.transform(lat, lon, Z)
+    
+    # transform WGS84 proj to local UTM
+    myProj = Proj(epsg)
+    X_utm, Y_utm = myProj(lon, lat)
+    
+    return Y_utm, X_utm, Z_egm08
 
 # Snippet by Eric Guenther (via Amy N.) for assigning photons to a segment
 def getAtl03SegID(atl03_ph_index_beg, atl03_segment_id, atl03_heights_len): 
@@ -133,7 +146,7 @@ def get_sea_height(binned_data):
     sea_height = []
     
     # Group data by latitude
-    binned_data_sea = binned_data[(binned_data['photon_height'] > -1)] # Filter out subsurface data
+    binned_data_sea = binned_data[(binned_data['photon_height'] > -0.5)] # Filter out subsurface data
     grouped_data = binned_data_sea.groupby(['lat_bins'], group_keys=True)
     data_groups = dict(list(grouped_data))
     
@@ -286,7 +299,7 @@ def get_bath_height(binned_data, percentile, WSHeight, height_resolution):
     
     return bath_height
 
-def produce_figures(binned_data, bath_height, sea_height, scene_location, y_limit_top, y_limit_bottom, file_destination, percentile, data_path):
+def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_bottom, file_destination, percentile, data_path):
     
     # Create bins for latitude
     x_axis_bins = np.linspace(binned_data.latitude.min(), binned_data.latitude.max(), len(sea_height))
@@ -314,7 +327,7 @@ def produce_figures(binned_data, bath_height, sea_height, scene_location, y_limi
 
     file = data_path[-39:-3]
     
-    plt.title('Icesat2 Bathymetry\n' + scene_location + '\n' + file)
+    plt.title('Icesat2 Bathymetry\n' + file)
     plt.xlabel('Latitude')
     plt.ylabel('Photon H (in m)')
 
@@ -328,7 +341,7 @@ def produce_figures(binned_data, bath_height, sea_height, scene_location, y_limi
     
     
     # Define where to save file
-    plt.savefig(file_destination + '/' + file + '_' + scene_location + '_' + str(percentile) + '_' + timestr + '.png')
+    plt.savefig(file_destination + '/' + file + '_' + str(percentile) + '_' + timestr + '.png')
     
     plt.show()
     
@@ -339,10 +352,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", type=str, help="Specify the input ICESAT H5 file")
     parser.add_argument("-l", "--laser", type=str, help="Specify the ICESAT-2 laser number (1, 2 or 3)")
-    parser.add_argument("-e", "--epsg_num", type=str, help="Specify the UTM Zone EPSG code (www.spatialreference.org)")
-    parser.add_argument("-loc", "--location", type=str, help="Specify the country to display")
     parser.add_argument("-th", "--thresh", type=int, help="Specify the threshold percentage")
-    parser.add_argument("-o", "--output", type=str, help="Specify the output location")
+    parser.add_argument("-o", "--output", type=str, required = FALSE,help="Specify the output location")
     parser.add_argument("-lr", "--lat_res", type=float, default = 10, help="Specify the latitudinal resoltuion (normally 10)")
     parser.add_argument("-hr", "--h_res", type=float, default = 0.5, help="Specify the height resolution (normally 0.5)")
     parser.add_argument("-wt", "--waterTemp", type=float, default = 20, help="Specify the water temperature in degrees C")
@@ -355,14 +366,8 @@ def main():
     elif args.laser == None:
         print('MISSING LASER NUMBER')
         os._exit(1)
-    elif args.epsg_num == None:
-        print('MISSING UTM ZONE')
-        os._exit(1)
     elif args.waterTemp == None:
         print('MISSING WATER TEMP')
-        os._exit(1)
-    elif args.location == None:
-        print('MISSING COUNTRY')
         os._exit(1)
     elif args.lat_res == None:
         print('MISSING LATITUDINAL RESOLUTION')
@@ -379,7 +384,9 @@ def main():
         
     latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id = ReadATL03(args.input, args.laser)
     
-    lat_utm, lon_utm, photon_h = OrthometricCorrection(latitude, longitude, photon_h, args.epsg_num)
+    epsg_code = convert_wgs_to_utm(longitude[0], latitude[0])
+    
+    lat_utm, lon_utm, photon_h = OrthometricCorrection(latitude, longitude, photon_h, epsg_code)
     
     # Get ref-elev and ref_azimuth at photon level
     # Get length of photon array
@@ -425,7 +432,7 @@ def main():
     
     plt.close()
     
-    produce_figures(binned_data, bath_height, sea_height, args.location, 10, -20, args.output, args.thresh, args.input)
+    produce_figures(binned_data, bath_height, sea_height, 10, -20, args.output, args.thresh, args.input)
 
 if __name__ == '__main__':
     main()
