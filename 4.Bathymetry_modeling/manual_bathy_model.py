@@ -415,23 +415,31 @@ def main():
     # Focus on specific latitude
     if args.start_lat is not None:
         dataset_sea1 = dataset_sea1[(dataset_sea1['latitude'] > args.start_lat) & (dataset_sea1['latitude'] < args.end_lat)]
-        else pass
-    
-    binned_data_sea = bin_data(dataset_sea1, args.lat_res, args.h_res)
-    
+#     else:
+#         pass
+    binned_data_sea = bin_data(dataset_sea1, lat_resolution, height_resolution)
     sea_height = get_sea_height(binned_data_sea)
-    
+
     # Set sea height
     WSHeight = np.nanmedian(sea_height)
-    
-    # Set sea temperature
-    waterTemp = args.waterTemp
 
-    RefX, RefY, RefZ, RefConf, rawX, rawY, rawZ, ph_ref_azi, ph_ref_elev = RefractionCorrection(waterTemp, WSHeight, 532, dataset_sea1.ref_elevation, dataset_sea1.ref_azminuth, dataset_sea1.photon_height, dataset_sea1.longitude, dataset_sea1.latitude, dataset_sea1.confidence) # XYZ are what we're interested in .
+    # Set sea temperature
+    waterTemp = 20
+
+    RefX, RefY, RefZ, RefConf, rawX, rawY, rawZ, ph_ref_azi, ph_ref_elev = RefractionCorrection(waterTemp, WSHeight, 532, dataset_sea1.ref_elevation, dataset_sea1.ref_azminuth, dataset_sea1.photon_height, dataset_sea1.longitude, dataset_sea1.latitude, dataset_sea1.confidence)
+    # XYZ are what we're interested in .
+
+    # Find bathy depth
+    depth = WSHeight - RefZ
 
     # Create new dataframe with refraction corrected data
-    dataset_bath = pd.DataFrame({'latitude': rawY, 'longitude': rawX, 'cor_latitude':RefY, 'cor_longitude':RefX, 'cor_photon_height':RefZ, 'photon_height': rawZ, 'confidence':RefConf}, 
-                           columns=['latitude', 'longitude', 'photon_height', 'cor_latitude','cor_longitude', 'cor_photon_height', 'confidence'])
+    dataset_bath = pd.DataFrame({'latitude': rawY, 'longitude': rawX, 'cor_latitude':RefY, 'cor_longitude':RefX, 'cor_photon_height':RefZ, 'photon_height': rawZ, 'confidence':RefConf, 'depth':depth}, 
+                       columns=['latitude', 'longitude', 'photon_height', 'cor_latitude','cor_longitude', 'cor_photon_height', 'confidence', 'depth'])
+
+    # Export dataframe to gpkg
+    geodf = geopandas.GeoDataFrame(dataset_bath, geometry=geopandas.points_from_xy(dataset_bath.longitude, dataset_bath.latitude))
+    file = data_path[-39:-3]
+    geodf.to_file(file + ".gpkg", driver="GPKG")
     
     binned_data = bin_data(dataset_bath, args.lat_res, args.h_res)
     
