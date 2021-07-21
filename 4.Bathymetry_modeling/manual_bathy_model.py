@@ -299,7 +299,7 @@ def get_bath_height(binned_data, percentile, WSHeight, height_resolution):
     
     return bath_height
 
-def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_bottom, file_destination, percentile, data_path):
+def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_bottom, percentile, data_path):
     
     # Create bins for latitude
     x_axis_bins = np.linspace(binned_data.latitude.min(), binned_data.latitude.max(), len(sea_height))
@@ -415,8 +415,7 @@ def main():
     # Focus on specific latitude
     if args.start_lat is not None:
         dataset_sea1 = dataset_sea1[(dataset_sea1['latitude'] > args.start_lat) & (dataset_sea1['latitude'] < args.end_lat)]
-#     else:
-#         pass
+
     binned_data_sea = bin_data(dataset_sea1, lat_resolution, height_resolution)
     sea_height = get_sea_height(binned_data_sea)
 
