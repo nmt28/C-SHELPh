@@ -416,7 +416,7 @@ def main():
     if args.start_lat is not None:
         dataset_sea1 = dataset_sea1[(dataset_sea1['latitude'] > args.start_lat) & (dataset_sea1['latitude'] < args.end_lat)]
 
-    binned_data_sea = bin_data(dataset_sea1, lat_resolution, height_resolution)
+    binned_data_sea = bin_data(dataset_sea1, args.lat_res, args.h_res)
     sea_height = get_sea_height(binned_data_sea)
 
     # Set sea height
