@@ -300,7 +300,7 @@ def get_bath_height(binned_data, percentile, WSHeight, height_resolution):
     
     return bath_height
 
-def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_bottom, percentile, data_path):
+def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_bottom, percentile, file):
     
     # Create bins for latitude
     x_axis_bins = np.linspace(binned_data.latitude.min(), binned_data.latitude.max(), len(sea_height))
@@ -320,13 +320,11 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     
     # Plot raw points
 #     plt.scatter(x=binned_data.latitude, y = binned_data.photon_height, marker='o', lw=0, s=1, alpha = 0.8, c = 'yellow', label = 'Raw photon height')
-    plt.scatter(x=binned_data.cor_latitude, y = binned_data.cor_photon_height, marker='o', lw=0, s=0.5, alpha = 0.3, c = 'black', label = 'Corrected photon height')
+    plt.scatter(x=binned_data.cor_latitude, y = binned_data.cor_photon_height, marker='o', lw=0, s=0.5, alpha = 0.2, c = 'black', label = 'Corrected photon height')
 
     # Plot median values
     plt.scatter(bath_median_df.x, bath_median_df.y, marker = 'o', c='r', alpha = 0.8, s = 5, label = 'Median bathymetry')
     plt.scatter(sea_median_df.x, sea_median_df.y, marker = 'o', c='b', alpha = 1, s = 0.5, label = 'Median sea surface')
-
-    file = data_path[-39:-3]
     
     plt.title('Icesat2 Bathymetry\n' + file)
     plt.xlabel('Latitude')
@@ -438,7 +436,7 @@ def main():
 
     # Export dataframe to gpkg
     geodf = geopandas.GeoDataFrame(dataset_bath, geometry=geopandas.points_from_xy(dataset_bath.longitude, dataset_bath.latitude))
-    file = data_path[-39:-3]
+    file = args.input[-39:-3]
     geodf.to_file(file + ".gpkg", driver="GPKG")
     
     binned_data = bin_data(dataset_bath, args.lat_res, args.h_res)
