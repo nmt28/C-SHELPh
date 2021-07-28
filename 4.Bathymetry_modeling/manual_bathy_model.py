@@ -27,10 +27,14 @@ import pandas as pd
 import argparse
 import os
 import subprocess
-import time 
+import time
 import utm
 import math
+import fiona
 import geopandas
+import netCDF4
+from datetime import datetime
+
 
 def ReadATL03(h5_file, laser_num):
     # Read File
@@ -171,6 +175,39 @@ def get_sea_height(binned_data):
     sea_height_1 = np.where((sea_height > (mean + 2*sd)) | (sea_height < (mean - 2*sd)), np.nan, sea_height).tolist()
     
     return sea_height_1
+
+def get_water_temp(data_path, latitude, longitude):
+    date = data_path[-33:-25]
+    year = date[0:4]
+    month = date[4:6]
+    day = date[6:8]
+    day_of_year = datetime.strptime(date, '%Y%m%d').timetuple().tm_yday
+
+    old_lat = latitude.mean()
+    old_lat_min = -90
+    old_lat_max = 90
+    new_lat_min = 0
+    new_lat_max = 17998
+
+    new_lat = round(((old_lat - old_lat_min) / (old_lat_max - old_lat_min)) * 
+                    (new_lat_max - new_lat_min) + new_lat_min)
+
+    old_lon = longitude.mean()
+    old_lon_min = -180
+    old_lon_max = 180
+    new_lon_min = 0
+    new_lon_max = 35999
+
+    new_lon = round(((old_lon - old_lon_min) / (old_lon_max - old_lon_min)) * 
+                    (new_lon_max - new_lon_min) + new_lon_min)
+
+    url = 'https://opendap.jpl.nasa.gov/opendap/OceanTemperature/ghrsst/data/GDS2/L4/GLOB/JPL/MUR/v4.1/'\
+        + str(year) + '/' + str(day_of_year) + '/' + str(date) \
+        + '090000-JPL-L4_GHRSST-SSTfnd-MUR-GLOB-v02.0-fv04.1.nc'
+
+    dataset = netCDF4.Dataset(url)
+    water_temp = dataset['analysed_sst'][0,new_lat, new_lon] - 273.15
+    return water_temp
 
 def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azimuth, PhotonZ, PhotonX, PhotonY, Ph_Conf):
     
@@ -422,7 +459,7 @@ def main():
     WSHeight = np.nanmedian(sea_height)
 
     # Set sea temperature
-    waterTemp = 20
+    waterTemp = get_water_temp(data_path, latitude, longitude)
 
     RefX, RefY, RefZ, RefConf, rawX, rawY, rawZ, ph_ref_azi, ph_ref_elev = RefractionCorrection(waterTemp, WSHeight, 532, dataset_sea1.ref_elevation, dataset_sea1.ref_azminuth, dataset_sea1.photon_height, dataset_sea1.longitude, dataset_sea1.latitude, dataset_sea1.confidence)
     # XYZ are what we're interested in .
