@@ -202,7 +202,9 @@ def get_water_temp(data_path, latitude, longitude):
     year = date[0:4]
     month = date[4:6]
     day = date[6:8]
-    day_of_year = datetime.strptime(date, '%Y%m%d').timetuple().tm_yday
+    day_of_year = str(datetime.strptime(date, '%Y%m%d').timetuple().tm_yday)
+    # Add zero in fro
+    zero_day_of_year = day_of_year.zfill(3)
 
     # Calculate ratio of latitude from mid-point of IS2 track
     old_lat = latitude.mean()
@@ -226,9 +228,9 @@ def get_water_temp(data_path, latitude, longitude):
 
     # Access the SST data using the JPL OpenDap interface
     url = 'https://opendap.jpl.nasa.gov/opendap/OceanTemperature/ghrsst/data/GDS2/L4/GLOB/JPL/MUR/v4.1/'\
-        + str(year) + '/' + str(day_of_year) + '/' + str(date) \
+        + str(year) + '/' + str(zero_day_of_year) + '/' + str(date) \
         + '090000-JPL-L4_GHRSST-SSTfnd-MUR-GLOB-v02.0-fv04.1.nc'
-
+    
     dataset = netCDF4.Dataset(url)
     
     # Access the data and convert the temperature from K to C
