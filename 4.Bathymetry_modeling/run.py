@@ -145,7 +145,7 @@ def main():
     
     # Create figure
     plt.close()
-    produce_figures(binned_data, bath_height, sea_height, 10, -20, args.thresh, args.input)
+    produce_figures(binned_data, bath_height, sea_height, 10, -20, args.thresh, file)
 
 if __name__ == '__main__':
     main()
