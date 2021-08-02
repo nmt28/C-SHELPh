@@ -121,8 +121,13 @@ def main():
     # Calculate sea temperature
     try:
         sst_calculated = get_water_temp(args.input, latitude, longitude)
+    
+    else:
+        pass
+        
     if 15 <= sst_calculated <= 30:
         waterTemp = sst_calculated
+        
     else:
         waterTemp = 20
 
