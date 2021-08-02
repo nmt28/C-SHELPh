@@ -122,7 +122,7 @@ def main():
     try:
         sst_calculated = get_water_temp(args.input, latitude, longitude)
     
-    except OSError::
+    except OSError:
         sst_calculated = 20
         
     if 15 <= sst_calculated <= 30:
