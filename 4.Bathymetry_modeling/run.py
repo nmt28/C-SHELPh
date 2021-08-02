@@ -119,7 +119,8 @@ def main():
     WSHeight = np.nanmedian(sea_height)
 
     # Calculate sea temperature
-    sst_calculated = get_water_temp(args.input, latitude, longitude)
+    try:
+        sst_calculated = get_water_temp(args.input, latitude, longitude)
     if 15 <= sst_calculated <= 30:
         waterTemp = sst_calculated
     else:
