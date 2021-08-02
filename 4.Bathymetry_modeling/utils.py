@@ -203,7 +203,7 @@ def get_water_temp(data_path, latitude, longitude):
     month = date[4:6]
     day = date[6:8]
     day_of_year = str(datetime.strptime(date, '%Y%m%d').timetuple().tm_yday)
-    # Add zero in fro
+    # Add zero in front of day of year string
     zero_day_of_year = day_of_year.zfill(3)
 
     # Calculate ratio of latitude from mid-point of IS2 track
