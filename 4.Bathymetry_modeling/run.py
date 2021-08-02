@@ -118,8 +118,12 @@ def main():
     # Set sea height
     WSHeight = np.nanmedian(sea_height)
 
-    # Set sea temperature
-    waterTemp = get_water_temp(args.input, latitude, longitude)
+    # Calculate sea temperature
+    sst_calculated = get_water_temp(args.input, latitude, longitude)
+    if 15 <= sst_calculated <= 30:
+        waterTemp = sst_calculated
+    else:
+        waterTemp = 20
 
     # Correct for refraction 
     RefX, RefY, RefZ, RefConf, rawX, rawY, rawZ, ph_ref_azi, ph_ref_elev = RefractionCorrection(waterTemp, WSHeight, 532, dataset_sea1.ref_elevation, dataset_sea1.ref_azminuth, 
