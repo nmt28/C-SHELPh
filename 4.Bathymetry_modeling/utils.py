@@ -342,6 +342,10 @@ def get_bath_height(binned_data, percentile, WSHeight, height_resolution):
     # Create sea height list
     bath_height = []
     
+    geo_photon_height = []
+    geo_longitude = []
+    geo_latitude = []
+    
     # Group data by latitude
     # Filter out surface data that are two bins below median surface value calculated above
     binned_data_bath = binned_data[(binned_data['photon_height'] < WSHeight - (height_resolution * 2))] 
@@ -359,6 +363,11 @@ def get_bath_height(binned_data, percentile, WSHeight, height_resolution):
         
         # Set threshold of photon counts per bin
         if new_df.iloc[bath_bin]['latitude'] >= count_threshold:
+            
+            geo_photon_height.append(v.loc[v['height_bins']==bath_bin_h, 'cor_photon_height'].values)
+            geo_longitude.append(v.loc[v['height_bins']==bath_bin_h, 'cor_longitude'].values)
+            geo_latitude.append(v.loc[v['height_bins']==bath_bin_h, 'cor_latitude'].values)
+            
             bath_bin_median = v.loc[v['height_bins']==bath_bin_h, 'cor_photon_height'].median()
             bath_height.append(bath_bin_median)
             del new_df
@@ -366,10 +375,16 @@ def get_bath_height(binned_data, percentile, WSHeight, height_resolution):
         else:
             bath_height.append(np.nan)
             del new_df
+    geo_longitude_list = np.concatenate(geo_longitude).ravel().tolist()
+    geo_latitude_list = np.concatenate(geo_latitude).ravel().tolist()
+    geo_photon_list = np.concatenate(geo_photon_height).ravel().tolist()
+    geo_df = pd.DataFrame({'longitude': geo_longitude_list, 'latitude':geo_latitude_list, 'photon_height': geo_photon_list})
     
-    return bath_height
+    del geo_longitude_list, geo_latitude_list, geo_photon_list
+    
+    return bath_height, geo_df
 
-def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_bottom, percentile, file):
+def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_bottom, percentile, file, geo_df):
     '''Create figures'''
     
     # Create bins for latitude
@@ -390,7 +405,7 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     
     # Plot raw points
 #     plt.scatter(x=binned_data.latitude, y = binned_data.photon_height, marker='o', lw=0, s=1, alpha = 0.8, c = 'yellow', label = 'Raw photon height')
-    plt.scatter(x=binned_data.cor_latitude, y = binned_data.cor_photon_height, marker='o', lw=0, s=0.5, alpha = 0.2, c = 'black', label = 'Corrected photon height')
+    plt.scatter(x=geo_df.latitude, y = geo_df.photon_height, marker='o', lw=0, s=0.5, alpha = 0.2, c = 'black', label = 'Corrected photon height')
 
     # Plot median values
     plt.scatter(bath_median_df.x, bath_median_df.y, marker = 'o', c='r', alpha = 0.8, s = 5, label = 'Median bathymetry')
@@ -415,3 +430,6 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     plt.show()
     
     plt.close()
+
+    geodf = geopandas.GeoDataFrame(geo_df, geometry=geopandas.points_from_xy(geo_df.longitude, geo_df.latitude))
+    geodf.to_file(file + ".gpkg", driver="GPKG")

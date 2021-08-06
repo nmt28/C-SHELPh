@@ -150,11 +150,11 @@ def main():
     binned_data = bin_data(dataset_bath, args.lat_res, args.h_res)
     
     # Find bathymetry 
-    bath_height = get_bath_height(binned_data, args.thresh, WSHeight, args.h_res)
+    bath_height, geo_df = get_bath_height(binned_data, args.thresh, WSHeight, args.h_res)
     
     # Create figure
     plt.close()
-    produce_figures(binned_data, bath_height, sea_height, 10, -20, args.thresh, file)
+    produce_figures(binned_data, bath_height, sea_height, 10, -20, args.thresh, file, geo_df)
 
 if __name__ == '__main__':
     main()
