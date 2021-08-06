@@ -141,10 +141,10 @@ def main():
     dataset_bath = pd.DataFrame({'latitude': rawY, 'longitude': rawX, 'cor_latitude':RefY, 'cor_longitude':RefX, 'cor_photon_height':RefZ, 'photon_height': rawZ, 'confidence':RefConf, 'depth':depth}, 
                        columns=['latitude', 'longitude', 'photon_height', 'cor_latitude','cor_longitude', 'cor_photon_height', 'confidence', 'depth'])
 
-    # Export dataframe to gpkg
-    geodf = geopandas.GeoDataFrame(dataset_bath, geometry=geopandas.points_from_xy(dataset_bath.longitude, dataset_bath.latitude))
-    file = args.input[-39:-3]
-    geodf.to_file(file + ".gpkg", driver="GPKG")
+#     # Export dataframe to gpkg
+#     geodf = geopandas.GeoDataFrame(dataset_bath, geometry=geopandas.points_from_xy(dataset_bath.longitude, dataset_bath.latitude))
+#     file = args.input[-39:-3]
+#     geodf.to_file(file + ".gpkg", driver="GPKG")
     
     # Bin dataset again for bathymetry
     binned_data = bin_data(dataset_bath, args.lat_res, args.h_res)

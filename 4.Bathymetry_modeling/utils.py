@@ -405,7 +405,7 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     
     # Plot raw points
 #     plt.scatter(x=binned_data.latitude, y = binned_data.photon_height, marker='o', lw=0, s=1, alpha = 0.8, c = 'yellow', label = 'Raw photon height')
-    plt.scatter(x=geo_df.latitude, y = geo_df.photon_height, marker='o', lw=0, s=0.8, alpha = 0.8, c = 'black', label = 'Corrected photon height')
+    plt.scatter(x=geo_df.latitude, y = geo_df.photon_height, marker='o', lw=0, s=0.8, alpha = 0.8, c = 'black', label = 'Corrected photon bin')
 
     # Plot median values
     plt.scatter(bath_median_df.x, bath_median_df.y, marker = 'o', c='r', alpha = 0.8, s = 5, label = 'Median bathymetry')
