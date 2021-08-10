@@ -432,4 +432,4 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     plt.close()
 
     geodf = geopandas.GeoDataFrame(geo_df, geometry=geopandas.points_from_xy(geo_df.longitude, geo_df.latitude))
-    geodf.to_file(file + ".gpkg", driver="GPKG")
+    geodf.to_file(file + '_' + str(percentile) + '_' + timestr +  ".gpkg", driver="GPKG")
