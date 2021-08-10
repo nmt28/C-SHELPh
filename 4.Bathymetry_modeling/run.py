@@ -143,7 +143,7 @@ def main():
 
 #     # Export dataframe to gpkg
 #     geodf = geopandas.GeoDataFrame(dataset_bath, geometry=geopandas.points_from_xy(dataset_bath.longitude, dataset_bath.latitude))
-#     file = args.input[-39:-3]
+    file = args.input[-39:-3]
 #     geodf.to_file(file + ".gpkg", driver="GPKG")
     
     # Bin dataset again for bathymetry
