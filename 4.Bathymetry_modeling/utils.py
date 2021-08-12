@@ -375,16 +375,18 @@ def get_bath_height(binned_data, percentile, WSHeight, height_resolution):
         else:
             bath_height.append(np.nan)
             del new_df
+            
     geo_longitude_list = np.concatenate(geo_longitude).ravel().tolist()
     geo_latitude_list = np.concatenate(geo_latitude).ravel().tolist()
     geo_photon_list = np.concatenate(geo_photon_height).ravel().tolist()
-    geo_df = pd.DataFrame({'longitude': geo_longitude_list, 'latitude':geo_latitude_list, 'photon_height': geo_photon_list})
+    geo_depth = WSHeight - geo_photon_list
+    geo_df = pd.DataFrame({'longitude': geo_longitude_list, 'latitude':geo_latitude_list, 'photon_height': geo_photon_list, 'depth':geo_depth})
     
     del geo_longitude_list, geo_latitude_list, geo_photon_list
     
     return bath_height, geo_df
 
-def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_bottom, percentile, file, geo_df):
+def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_bottom, percentile, file, geo_df, RefY, RefZ, laser, epsg_num):
     '''Create figures'''
     
     # Create bins for latitude
@@ -405,10 +407,13 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     
     # Plot raw points
 #     plt.scatter(x=binned_data.latitude, y = binned_data.photon_height, marker='o', lw=0, s=1, alpha = 0.8, c = 'yellow', label = 'Raw photon height')
-    plt.scatter(x=geo_df.latitude, y = geo_df.photon_height, marker='o', lw=0, s=0.8, alpha = 0.8, c = 'black', label = 'Corrected photon bin')
+    plt.scatter(RefY, RefZ, s=0.2, alpha=0.1, c='black')
+    plt.scatter(geo_df.latitude, geo_df.photon_height, s=0.5, alpha=0.1, c='red')
+    
+    #plt.scatter(x=geo_df.latitude, y = geo_df.photon_height, marker='o', lw=0, s=0.8, alpha = 0.8, c = 'black', label = 'Corrected photon bin')
 
     # Plot median values
-    plt.scatter(bath_median_df.x, bath_median_df.y, marker = 'o', c='r', alpha = 0.8, s = 5, label = 'Median bathymetry')
+    #plt.scatter(bath_median_df.x, bath_median_df.y, marker = 'o', c='r', alpha = 0.8, s = 5, label = 'Median bathymetry')
     plt.scatter(sea_median_df.x, sea_median_df.y, marker = 'o', c='b', alpha = 1, s = 0.5, label = 'Median sea surface')
     
     # Insert titles and sub-titles
@@ -423,13 +428,14 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     plt.ylim(top = y_limit_top, bottom = y_limit_bottom)
     
     timestr = time.strftime("%Y%m%d_%H%M%S")
-    
+    file = file.replace('.h5','')
     # Define where to save file
-    plt.savefig(os.getcwd() + '/' + file + '_' + str(percentile) + '_' + timestr + '.png')
-    
+    plt.savefig(file + '_gt' + str(laser) + '_' + str(percentile) + '_' + timestr + '.png')
     plt.show()
-    
     plt.close()
 
     geodf = geopandas.GeoDataFrame(geo_df, geometry=geopandas.points_from_xy(geo_df.longitude, geo_df.latitude))
-    geodf.to_file(file + '_' + str(percentile) + '_' + timestr +  ".gpkg", driver="GPKG")
+    
+    geodf.set_crs(epsg=epsg_num)
+    
+    geodf.to_file(file + '_gt' + str(laser) + '_' + str(percentile) + '_' + timestr + ".gpkg", driver="GPKG")
