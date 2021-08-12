@@ -77,15 +77,19 @@ def main():
     # Read in the data
     latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id = ReadATL03(args.input, args.laser)
     
+    print(latitude)
+    print(photon_h)
     # Find the epsg code
     epsg_code = convert_wgs_to_utm(longitude[0], latitude[0])
-    
+    epsg_num = int(epsg_code.split(':')[-1])
+    print(epsg_code)
     # Orthometrically correct the data using the epsg code
     lat_utm, lon_utm, photon_h = OrthometricCorrection(latitude, longitude, photon_h, epsg_code)
-    
+    print(photon_h)
     # Get ref-elev and ref_azimuth at photon level
     # Get length of photon array
     heights_len = len(photon_h)
+    print(heights_len)
     # Assign segment id to each photon for the segment it is in
     Ph_segment_id = getAtl03SegID(ph_index_beg, segment_id, heights_len)
     # Cast as an int
@@ -98,9 +102,12 @@ def main():
     # Aggregate data into dataframe
     dataset_sea = pd.DataFrame({'latitude': lat_utm, 'longitude': lon_utm, 'photon_height': photon_h, 'confidence':conf, 'ref_elevation':Ph_ref_elev, 'ref_azminuth':Ph_ref_azimuth}, 
                            columns=['latitude', 'longitude', 'photon_height', 'confidence', 'ref_elevation', 'ref_azminuth'])
-
+    
+    plt.scatter(lat_utm, photon_h, c='black', s=0.1, alpha=0.1)
+    plt.show()
     # Filter data that should not be analyzed
     # Filter for quality flags
+    print('filter quality flags')
     dataset_sea1 = dataset_sea[(dataset_sea.confidence != 0)  & (dataset_sea.confidence != 1)]
     # Filter for elevation range
     dataset_sea1 = dataset_sea1[(dataset_sea1['photon_height'] > -40) & (dataset_sea1['photon_height'] < 5)]
@@ -109,7 +116,10 @@ def main():
     if args.start_lat is not None:
         dataset_sea1 = dataset_sea1[(dataset_sea1['latitude'] > args.start_lat) & (dataset_sea1['latitude'] < args.end_lat)]
 
+    #plt.scatter(dataset_sea1['latitude'], dataset_sea1['photon_height'],c='black',s=0.2,alpha=0.1)
+    #plt.show()
     # Bin dataset
+    print(dataset_sea1.head())
     binned_data_sea = bin_data(dataset_sea1, args.lat_res, args.h_res)
     
     # Find mean sea height
@@ -143,7 +153,7 @@ def main():
 
 #     # Export dataframe to gpkg
 #     geodf = geopandas.GeoDataFrame(dataset_bath, geometry=geopandas.points_from_xy(dataset_bath.longitude, dataset_bath.latitude))
-    file = args.input[-39:-3]
+    file = args.input
 #     geodf.to_file(file + ".gpkg", driver="GPKG")
     
     # Bin dataset again for bathymetry
@@ -154,7 +164,7 @@ def main():
     
     # Create figure
     plt.close()
-    produce_figures(binned_data, bath_height, sea_height, 10, -20, args.thresh, file, geo_df)
+    produce_figures(binned_data, bath_height, sea_height, 10, -20, args.thresh, file, geo_df, RefY, RefZ, args.laser, epsg_num)
 
 if __name__ == '__main__':
     main()
