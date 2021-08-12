@@ -103,8 +103,8 @@ def main():
     dataset_sea = pd.DataFrame({'latitude': lat_utm, 'longitude': lon_utm, 'photon_height': photon_h, 'confidence':conf, 'ref_elevation':Ph_ref_elev, 'ref_azminuth':Ph_ref_azimuth}, 
                            columns=['latitude', 'longitude', 'photon_height', 'confidence', 'ref_elevation', 'ref_azminuth'])
     
-    plt.scatter(lat_utm, photon_h, c='black', s=0.1, alpha=0.1)
-    plt.show()
+    #plt.scatter(lat_utm, photon_h, c='black', s=0.1, alpha=0.1)
+    #plt.show()
     # Filter data that should not be analyzed
     # Filter for quality flags
     print('filter quality flags')

@@ -1,15 +1,15 @@
 #!/bin/bash
 
 # change directories
-cd ~/Desktop/summer_2021/icesat/data/raw/cuba
+cd /Users/nmthomas/Documents/Research/ICESat2/SharkBay_ATL03
 
 # create list of threshold values to loop through
-declare -a threshold_array=(30 35 40 45 50 55 60 65 70 75)
+declare -a threshold_array=(45)
 
 for filename in *.h5
 do
 	for value in $threshold_array
 	do 
-		python run.py -i $filename -l 3 -th $value
+		python /Users/nmthomas/Documents/Developer/Icesat2_bathymetry/4.Bathymetry_modeling/run.py -i $filename -l 1 -th $value
 	done
 done

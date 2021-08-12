@@ -431,8 +431,8 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     file = file.replace('.h5','')
     # Define where to save file
     plt.savefig(file + '_gt' + str(laser) + '_' + str(percentile) + '_' + timestr + '.png')
-    plt.show()
-    plt.close()
+    #plt.show()
+    #plt.close()
 
     geodf = geopandas.GeoDataFrame(geo_df, geometry=geopandas.points_from_xy(geo_df.longitude, geo_df.latitude))
     
