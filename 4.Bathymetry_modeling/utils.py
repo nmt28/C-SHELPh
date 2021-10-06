@@ -76,8 +76,8 @@ def convert_wgs_to_utm(lon: float, lat: float):
 
 def OrthometricCorrection(lat, lon, Z, epsg):
     # transform ellipsod (WGS84) height to orthometric height
-    transformerh = Transformer.from_crs("epsg:4326", "epsg:3855")
-    Y_egm08, X_egm08, Z_egm08 = transformerh.transform(lat, lon, Z)
+    transformerh = Transformer.from_crs("epsg:4326", "epsg:3855", always_xy=True)
+    X_egm08, Y_egm08, Z_egm08 = transformerh.transform(lon, lat, Z)
     
     # transform WGS84 proj to local UTM
     myProj = Proj(epsg)
