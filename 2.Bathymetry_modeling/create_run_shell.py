@@ -10,7 +10,7 @@ dir = '/Users/nmthomas/Documents/Research/ICESat2/SharkBay_ATL03/'
 
 files = glob.glob(dir + '/*.h5')
 
-txt_file = '/Users/nmthomas/Documents/Developer/Icesat2_bathymetry/4.Bathymetry_modeling/run_all.sh'
+txt_file = '/Users/nmthomas/Documents/Developer/Icesat2_bathymetry/4.Bathymetry_modeling/run_bathy.sh'
 txt = open(txt_file, 'w+')
 
 
