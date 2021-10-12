@@ -36,7 +36,7 @@ import geopandas
 import netCDF4
 from datetime import datetime
 # Import functions from utils.py
-from utils import *
+from bathy_utils import *
 
 def main():
     parser = argparse.ArgumentParser()
