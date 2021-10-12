@@ -5,7 +5,8 @@
 
 import icepyx as ipx
 
-def download_atl03(short_name, spatial_extent, date_range):
+def download_atl03(short_name, spatial_extent, date_range, earthdata_uid, earthdata_email, page_size, page_num, out_path):
+
     """ Function to search and download IS2"""
     region_a = ipx.Query(short_name, spatial_extent, date_range)
 
@@ -13,22 +14,8 @@ def download_atl03(short_name, spatial_extent, date_range):
 
     cont = input("Continue...? (yes/no): ")
     if cont == "yes":
-        # EarthData credentials
-        earthdata_uid = 'bhylee'
-        email = 'brianlee52@ucsb.edu'
-        session=region_a.earthdata_login(earthdata_uid, email)
-        page_size = 10 # This is the number of granules we will request per order.
-        # Determine the number of pages based on page size and the number of granules available.
-        #If no page_num is specified, this calculation is done automatically to set page_num,
-        #which then provides the number of individual orders we will request given the number
-        #of granules.
-        page_num = 3
-        #request_mode = 'async'
-        #agent = 'NO'
-        #include_meta = 'Y'
-        #Must be empty
-        path = '/Users/brian.h.lee/Desktop/icesat/data/raw'
-        region_a.download_granules(session, path, page_size, page_num)
+        session=region_a.earthdata_login(earthdata_uid, earthdata_email)
+        region_a.download_granules(session, out_path, page_size, page_num)
     elif cont == "no":
         print("answer 'yes' to continue")
     else:
@@ -48,12 +35,18 @@ def main():
     #polygon file: A string containing the full file path and name.
     #date_range = the date range for which you would like to search for results.
     #Must be formatted as a set of 'YYYY-MM-DD' strings.
+
     short_name = 'ATL03'
     spatial_extent = [-82.14258, 21.60278, -81.47461, 22.18276]
     #spatial_extent = './supporting_files/data-access_PineIsland/glims_polygons.kml'
     date_range = ['2021-02-05','2021-02-07']
+    earthdata_uid = 'bhylee'
+    earthdata_email = 'brianlee52@ucsb.edu'
+    page_size = 10
+    page_num = 3
+    out_path = '/Users/brian.h.lee/Desktop/icesat/data/raw'
 
-    download_atl03(short_name, spatial_extent, date_range)
+    download_atl03(short_name, spatial_extent, date_range, earthdata_uid, earthdata_email, page_size, page_num, out_path)
 
 if __name__=='__main__':
     main()
