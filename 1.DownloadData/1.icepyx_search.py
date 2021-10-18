@@ -14,8 +14,10 @@ def download_atl03(short_name, spatial_extent, date_range, earthdata_uid, earthd
 
     cont = input("Continue...? (yes/no): ")
     if cont == "yes":
-        session=region_a.earthdata_login(earthdata_uid, earthdata_email)
-        region_a.download_granules(session, out_path, page_size, page_num)
+        #session=region_a.earthdata_login(earthdata_uid, earthdata_email)
+        #region_a.download_granules(out_path, page_size, page_num)
+        region_a.earthdata_login(earthdata_uid, earthdata_email)
+        region_a.download_granules(out_path, page_size, page_num)
     elif cont == "no":
         print("answer 'yes' to continue")
     else:
@@ -37,16 +39,18 @@ def main():
     #Must be formatted as a set of 'YYYY-MM-DD' strings.
 
     short_name = 'ATL03'
-    spatial_extent = [-82.14258, 21.60278, -81.47461, 22.18276]
-    #spatial_extent = './supporting_files/data-access_PineIsland/glims_polygons.kml'
-    date_range = ['2021-02-05','2021-02-07']
-    earthdata_uid = 'bhylee'
-    earthdata_email = 'brianlee52@ucsb.edu'
+    #spatial_extent = [-82.14258, 21.60278, -81.47461, 22.18276]
+    spatial_extent = '/Users/nmthomas/Documents/Research/ICESat2/Dimos/Footprints/Footprint_S2_TOA_CaspianSea.shp'
+    date_range = ['2018-01-01','2021-10-31']
+    earthdata_uid = 'nathanmthomas'
+    earthdata_email = 'nathan.m.thomas@nasa.gov'
     page_size = 10
     page_num = 3
-    out_path = '/Users/brian.h.lee/Desktop/icesat/data/raw'
+    out_path = '/Users/nmthomas/Documents/Research/ICESat2/Dimos/CaspianSea/'
 
     download_atl03(short_name, spatial_extent, date_range, earthdata_uid, earthdata_email, page_size, page_num, out_path)
 
 if __name__=='__main__':
     main()
+
+
