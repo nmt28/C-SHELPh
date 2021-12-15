@@ -436,6 +436,7 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
 
     geodf = geopandas.GeoDataFrame(geo_df, geometry=geopandas.points_from_xy(geo_df.longitude, geo_df.latitude))
     
-    geodf.set_crs(epsg=epsg_num)
+    geodf.set_crs(epsg=epsg_num, inplace=True)
+    geodf.to_crs(epsg=epsg_num, inplace=True)
     
     geodf.to_file(file + '_gt' + str(laser) + '_' + str(percentile) + '_' + timestr + ".gpkg", driver="GPKG")

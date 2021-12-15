@@ -17,4 +17,4 @@ txt = open(txt_file, 'w+')
 for file in files:
     for l in laser_num:
         for t in thresh_array:
-            txt.write('python /Users/nmthomas/Documents/Developer/Icesat2_bathymetry/4.Bathymetry_modeling/run.py -i ' + str(file) + ' -l ' + str(l) + ' -th ' + str(t) + '\n')
+            txt.write('python /Users/nmthomas/Documents/Developer/Icesat2_bathymetry/2.Bathymetry_modeling/run_bathy.py -i ' + str(file) + ' -l ' + str(l) + ' -th ' + str(t) + '\n')
