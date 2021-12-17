@@ -433,10 +433,18 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     plt.savefig(file + '_gt' + str(laser) + '_' + str(percentile) + '_' + timestr + '.png')
     #plt.show()
     #plt.close()
+        
+    # convert corrected locations back to wgs84 (useful to contain)
+    transformer = Transformer.from_crs("EPSG:"+str(epsg_num), "EPSG:4326")
 
-    geodf = geopandas.GeoDataFrame(geo_df, geometry=geopandas.points_from_xy(geo_df.longitude, geo_df.latitude))
+    lon_wgs84, lat_wgs84 = transformer.transform(geo_df.longitude.values, geo_df.longitude.values)
+
+    geo_df['lon_wgs84'] = lon_wgs84
+    geo_df['lat_wgs84'] = lat_wgs84
     
-    geodf.set_crs(epsg=epsg_num, inplace=True)
-    geodf.to_crs(epsg=epsg_num, inplace=True)
+    geodf = geopandas.GeoDataFrame(geo_df, geometry=geopandas.points_from_xy(geo_df.lon_wgs84, geo_df.lat_wgs84))
     
-    geodf.to_file(file + '_gt' + str(laser) + '_' + str(percentile) + '_' + timestr + ".gpkg", driver="GPKG")
+    geodf.set_crs(epsg=4326, inplace=True)
+    geodf.to_crs(epsg=4326, inplace=True)
+    
+    geodf.to_file(file + '_gt' + str(laser) + '_' + str(percentile) + ' _EPSG' + str(epsg_num) '_' + timestr + ".gpkg", driver="GPKG")
