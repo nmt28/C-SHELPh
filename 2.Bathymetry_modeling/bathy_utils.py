@@ -447,4 +447,4 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     geodf.set_crs(epsg=4326, inplace=True)
     geodf.to_crs(epsg=4326, inplace=True)
     
-    geodf.to_file(file + '_gt' + str(laser) + '_' + str(percentile) + ' _EPSG' + str(epsg_num) '_' + timestr + ".gpkg", driver="GPKG")
+    geodf.to_file(file + '_gt' + str(laser) + '_' + str(percentile) + ' _EPSG' + str(epsg_num) + '_' + timestr + ".gpkg", driver="GPKG")
