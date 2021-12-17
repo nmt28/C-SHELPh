@@ -434,17 +434,16 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     #plt.show()
     #plt.close()
         
-    # convert corrected locations back to wgs84 (useful to contain)
-    transformer = Transformer.from_crs("EPSG:"+str(epsg_num), "EPSG:4326")
-
-    lon_wgs84, lat_wgs84 = transformer.transform(geo_df.longitude.values, geo_df.longitude.values)
+        # convert corrected locations back to wgs84 (useful to contain)
+    transformer = Transformer.from_crs("EPSG:"+str(epsg_num), "EPSG:4326", always_xy=True)
+    print(transformer)
+    lon_wgs84, lat_wgs84 = transformer.transform(geo_df.longitude.values, geo_df.latitude.values)
 
     geo_df['lon_wgs84'] = lon_wgs84
     geo_df['lat_wgs84'] = lat_wgs84
     
-    geodf = geopandas.GeoDataFrame(geo_df, geometry=geopandas.points_from_xy(geo_df.lon_wgs84, geo_df.lat_wgs84))
+    geodf = geopandas.GeoDataFrame(geo_df, geometry=geopandas.points_from_xy(geo_df.lon_wgs84,geo_df.lat_wgs84))
     
     geodf.set_crs(epsg=4326, inplace=True)
-    geodf.to_crs(epsg=4326, inplace=True)
     
     geodf.to_file(file + '_gt' + str(laser) + '_' + str(percentile) + ' _EPSG' + str(epsg_num) + '_' + timestr + ".gpkg", driver="GPKG")
