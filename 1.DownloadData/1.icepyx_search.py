@@ -10,18 +10,14 @@ def download_atl03(short_name, spatial_extent, date_range, earthdata_uid, earthd
     """ Function to search and download IS2"""
     region_a = ipx.Query(short_name, spatial_extent, date_range)
 
-    print('\n print avail granules = ', region_a.avail_granules(), '\n')
+    n_granules = region_a.avail_granules()
 
-    cont = input("Continue...? (yes/no): ")
-    if cont == "yes":
-        #session=region_a.earthdata_login(earthdata_uid, earthdata_email)
-        #region_a.download_granules(out_path, page_size, page_num)
+    dwnload = input("There are " + str(n_granules) + " granules. Continue...? (yes/no): ")
+    if dwnload == "yes":
         region_a.earthdata_login(earthdata_uid, earthdata_email)
         region_a.download_granules(out_path, page_size, page_num)
-    elif cont == "no":
-        print("answer 'yes' to continue")
     else:
-        print('Answer "yes" or "no"')
+        print("Data not Downloaded")
 
 def main():
     """ run functions """
@@ -40,13 +36,13 @@ def main():
 
     short_name = 'ATL03'
     #spatial_extent = [-82.14258, 21.60278, -81.47461, 22.18276]
-    spatial_extent = '/Users/nmthomas/Documents/Research/ICESat2/Dimos/Footprints/Footprint_S2_TOA_CaspianSea.shp'
+    spatial_extent = 'ROI.shp'
     date_range = ['2018-01-01','2021-10-31']
-    earthdata_uid = 'nathanmthomas'
-    earthdata_email = 'nathan.m.thomas@nasa.gov'
+    earthdata_uid = 'myearthdata_uid'
+    earthdata_email = 'myearthdata_email'
     page_size = 10
     page_num = 3
-    out_path = '/Users/nmthomas/Documents/Research/ICESat2/Dimos/CaspianSea/'
+    out_path = '/myIS2data'
 
     download_atl03(short_name, spatial_extent, date_range, earthdata_uid, earthdata_email, page_size, page_num, out_path)
 
