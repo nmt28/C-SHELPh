@@ -1,5 +1,7 @@
 # Icesat2_bathymetry
 
+[![DOI](https://zenodo.org/badge/374786622.svg)](https://zenodo.org/badge/latestdoi/374786622)
+
 A git repo to keep track of automatic retrieval of bathy photons and perform ML regression model
 
 1.DownloadData: Provides an ICEPYX example (https://icepyx.readthedocs.io/en/latest/#) for automatically downloading IS2 data
