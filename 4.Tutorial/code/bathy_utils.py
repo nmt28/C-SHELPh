@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# conda install -c conda-forge proj-data
+# needed to install the relevant ortho files/grids
 
 #####
 # This group of functions processes ICESAT2 data and creates a bathymetric model. 
