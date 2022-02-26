@@ -1,4 +1,4 @@
-# Icesat2_bathymetry
+# C-SHELPh
 
 [![DOI](https://zenodo.org/badge/374786622.svg)](https://zenodo.org/badge/latestdoi/374786622)
 
