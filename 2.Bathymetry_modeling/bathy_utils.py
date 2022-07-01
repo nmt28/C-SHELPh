@@ -156,7 +156,6 @@ def ref_linear_interp(x, y):
             sub = np.linspace(min, max, len(idx))
             try:
                 bin = abs(sub[-2] - sub[-1])
-                print(bin)
             except:
                 bin = 0
             if min > max:

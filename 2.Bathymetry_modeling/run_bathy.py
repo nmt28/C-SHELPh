@@ -96,11 +96,11 @@ def main():
     Ph_ref_azimuth_cat = ref_azimuth[np.searchsorted(segment_id, Ph_segment_id)]
     Ph_ref_azimuth = ref_linear_interp(Ph_segment_id, Ph_ref_azimuth_cat)
 
-
+    '''
     plt.scatter(lat_utm,Ph_ref_azimuth)
     plt.scatter(lat_utm,Ph_ref_azimuth_cat)
     plt.show()
-
+    '''
     
     # Aggregate data into dataframe
     dataset_sea = pd.DataFrame({'latitude': lat_utm, 'longitude': lon_utm, 'photon_height': photon_h, 'confidence':conf, 'ref_elevation':Ph_ref_elev, 'ref_azminuth':Ph_ref_azimuth}, 
