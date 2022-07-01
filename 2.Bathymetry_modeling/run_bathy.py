@@ -77,28 +77,31 @@ def main():
     # Read in the data
     latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id = ReadATL03(args.input, args.laser)
     
-    print(latitude)
-    print(photon_h)
     # Find the epsg code
     epsg_code = convert_wgs_to_utm(longitude[0], latitude[0])
     epsg_num = int(epsg_code.split(':')[-1])
-    print(epsg_code)
     # Orthometrically correct the data using the epsg code
     lat_utm, lon_utm, photon_h = OrthometricCorrection(latitude, longitude, photon_h, epsg_code)
-    print(photon_h)
     # Get ref-elev and ref_azimuth at photon level
     # Get length of photon array
     heights_len = len(photon_h)
-    print(heights_len)
     # Assign segment id to each photon for the segment it is in
     Ph_segment_id = getAtl03SegID(ph_index_beg, segment_id, heights_len)
     # Cast as an int
-    Ph_segment_id = Ph_segment_id.astype(np.int)
+    Ph_segment_id = Ph_segment_id.astype(int)
     # Ref_elev on a per photon level (assign seg ref_elev to photons)
-    Ph_ref_elev = ref_elev[np.searchsorted(segment_id, Ph_segment_id)]
+    Ph_ref_elev_cat = ref_elev[np.searchsorted(segment_id, Ph_segment_id)]
+    Ph_ref_elev = ref_linear_interp(Ph_segment_id, Ph_ref_elev_cat)
     # Ref_azimuth on a per photon level (assign seg ref_azimuth to photons)
-    Ph_ref_azimuth = ref_azimuth[np.searchsorted(segment_id, Ph_segment_id)]
+    Ph_ref_azimuth_cat = ref_azimuth[np.searchsorted(segment_id, Ph_segment_id)]
+    Ph_ref_azimuth = ref_linear_interp(Ph_segment_id, Ph_ref_azimuth_cat)
 
+
+    plt.scatter(lat_utm,Ph_ref_azimuth)
+    plt.scatter(lat_utm,Ph_ref_azimuth_cat)
+    plt.show()
+
+    
     # Aggregate data into dataframe
     dataset_sea = pd.DataFrame({'latitude': lat_utm, 'longitude': lon_utm, 'photon_height': photon_h, 'confidence':conf, 'ref_elevation':Ph_ref_elev, 'ref_azminuth':Ph_ref_azimuth}, 
                            columns=['latitude', 'longitude', 'photon_height', 'confidence', 'ref_elevation', 'ref_azminuth'])
@@ -167,3 +170,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

@@ -128,6 +128,36 @@ def getAtl03SegID(atl03_ph_index_beg, atl03_segment_id, atl03_heights_len):
     # Return list of segment_id at the photon level
     return ph_segment_id
 
+def ref_linear_interp(x, y):
+
+    arr = []
+
+    ux=np.unique(x) #unique x values
+    for u in ux:
+        idx = y[x==u]
+        try:
+            min = y[x==u-1][0]
+            max = y[x==u][0]
+        except:
+            min = y[x==u][0]
+            max = y[x==u][0]
+            
+        try:
+            min = y[x==u][0]
+            max = y[x==u+1][0]
+        except:
+            min = y[x==u][0]
+            max = y[x==u][0]
+        
+        if min==max:
+            sub = np.full((len(idx)), min)
+            arr.append(sub)
+        else:
+            sub = np.linspace(min, max, len(idx))
+            arr.append(sub)
+
+    return np.concatenate(arr, axis=None).ravel()
+
 def bin_data(dataset, lat_res, height_res):
     '''Bin data along vertical and horizontal scales for later segmentation'''
     
