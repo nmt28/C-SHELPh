@@ -154,7 +154,16 @@ def ref_linear_interp(x, y):
             arr.append(sub)
         else:
             sub = np.linspace(min, max, len(idx))
-            arr.append(sub)
+            try:
+                bin = abs(sub[-2] - sub[-1])
+                print(bin)
+            except:
+                bin = 0
+            if min > max:
+                new = np.linspace(min,max+bin/2, len(idx))
+            elif max > min:
+                new = np.linspace(min+bin/2,max, len(idx))
+            arr.append(new)
 
     return np.concatenate(arr, axis=None).ravel()
 
