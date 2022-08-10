@@ -438,7 +438,7 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     # Plot raw points
 #     plt.scatter(x=binned_data.latitude, y = binned_data.photon_height, marker='o', lw=0, s=1, alpha = 0.8, c = 'yellow', label = 'Raw photon height')
     plt.scatter(RefY, RefZ, s=0.2, alpha=0.1, c='black')
-    plt.scatter(geo_df.latitude, geo_df.photon_height, s=0.5, alpha=0.1, c='red')
+    plt.scatter(geo_df.latitude, geo_df.photon_height, s=0.5, alpha=0.1, c='red', label = 'Classified Photons')
     
     #plt.scatter(x=geo_df.latitude, y = geo_df.photon_height, marker='o', lw=0, s=0.8, alpha = 0.8, c = 'black', label = 'Corrected photon bin')
 
@@ -448,10 +448,12 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     
     # Insert titles and sub-titles
     plt.title('Icesat2 Bathymetry\n' + file)
-    plt.xlabel('Latitude')
-    plt.ylabel('Photon H (in m)')
+    plt.xlabel('Latitude', fontsize=25)
+    plt.ylabel('Photon Height (m)', fontsize=25)
+    plt.xticks(fontsize=16)
+    plt.yticks(fontsize=16)
 
-    plt.legend(loc="upper left")
+    plt.legend(loc="upper left",prop={'size': 20})
 
     # Limit the x and y axes using parameters
     plt.xlim(left=binned_data.latitude.min(), right=binned_data.latitude.max())
@@ -460,6 +462,7 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     timestr = time.strftime("%Y%m%d_%H%M%S")
     file = file.replace('.h5','')
     # Define where to save file
+    plt.tight_layout()
     plt.savefig(file + '_gt' + str(laser) + '_' + str(percentile) + '_EPSG' + str(epsg_num) + '_' + timestr + ".png")
     #plt.show()
     #plt.close()
