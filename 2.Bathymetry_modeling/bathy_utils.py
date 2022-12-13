@@ -61,7 +61,7 @@ def ReadATL03(h5_file, laser_num):
     segment_id = f['/' + laser + '/geolocation/segment_id'][...,]
     altitude_sc = f['/' + laser + '/geolocation/altitude_sc'][...,]
     
-    return latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id
+    return latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id, altitude_sc
 
 # convert_wgs_to_utm function, see https://stackoverflow.com/a/40140326/4556479
 def convert_wgs_to_utm(lon: float, lat: float):
