@@ -314,7 +314,8 @@ def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azi
     # H = 496km. we pass in the mean of the orbit from /geolocation/altitude_sc/
     # Diff from min to max of 100m over an orbit is 0.02% at 496km
     # More error probably introduced from Re (mean Earth radius) than intra-orbit changes in altitude
-    H = mean_altitude/1000
+    H = 496
+    #H = mean_altitude/1000
     # Re = Radius of Earth (6371km mean)
     Re = 6371
     
