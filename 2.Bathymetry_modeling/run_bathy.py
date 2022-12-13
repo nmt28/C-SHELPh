@@ -88,7 +88,7 @@ def main():
     # Assign segment id to each photon for the segment it is in
     Ph_segment_id = getAtl03SegID(ph_index_beg, segment_id, heights_len)
     # Cast as an int
-    Ph_segment_id = Ph_segment_id.astype(int)
+    Ph_segment_id = int(Ph_segment_id)
     # Ref_elev on a per photon level (assign seg ref_elev to photons)
     Ph_ref_elev_cat = ref_elev[np.searchsorted(segment_id, Ph_segment_id)]
     Ph_ref_elev = ref_linear_interp(Ph_segment_id, Ph_ref_elev_cat)
