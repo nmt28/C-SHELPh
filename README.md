@@ -11,3 +11,5 @@ A git repo to keep track of automatic retrieval of bathy photons and perform ML 
 3.Regression\_Model: RSGISLib and Scikit-learn commands for performing Extra Trees Regression
 
 4.Documents: Basic tutorial on using C-SHELPh
+
+Note: The refraction correction currently uses a simplification of the incidence angle (theta1) as outlined by Parrish et al, 2019. For greater precision, the curvature of the Earth needs to be accounted for along the ICESat-2 track. This will be integrated into C-SHELPh as time permits.
