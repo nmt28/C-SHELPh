@@ -12,4 +12,4 @@ A git repo to keep track of automatic retrieval of bathy photons and perform ML 
 
 4.Documents: Basic tutorial on using C-SHELPh
 
-Note: The refraction correction currently uses a simplification of the incidence angle (theta1) as outlined by Parrish et al, 2019. For greater precision, the curvature of the Earth needs to be accounted for along the ICESat-2 track. This will be integrated into C-SHELPh as time permits.
+Note: The refraction correction currently uses photon level metrics (photon azimuth, photon elevation, satellite elev) to get an as accurate bathymetric model as possible. However, there is a small 'stepping' between IS2 segment id's. This is considered negligle given the quantities of data involved and value of the 'step' against the scale of the units

@@ -83,7 +83,9 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
     # Read in the data
     latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id, altitude_sc = ReadATL03(args.input, args.laser)
     
-    mean_altitude = np.mean(altitude_sc)
+    altitude_sc = np.where(altitude_sc>700000, np.nan, altitude_sc)
+    
+    altitude_sc[np.isnan(altitude_sc)] = np.nanmedian(altitude_sc)
     
     # Find the epsg code
     epsg_code = convert_wgs_to_utm(longitude[0], latitude[0])
@@ -97,22 +99,22 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
     Ph_segment_id = getAtl03SegID(ph_index_beg, segment_id, heights_len)
     # Cast as an int
     Ph_segment_id = Ph_segment_id.astype(np.int64)
+    
     # Ref_elev on a per photon level (assign seg ref_elev to photons)
     Ph_ref_elev_cat = ref_elev[np.searchsorted(segment_id, Ph_segment_id)]
     Ph_ref_elev = ref_linear_interp(Ph_segment_id, Ph_ref_elev_cat)
+    
     # Ref_azimuth on a per photon level (assign seg ref_azimuth to photons)
     Ph_ref_azimuth_cat = ref_azimuth[np.searchsorted(segment_id, Ph_segment_id)]
     Ph_ref_azimuth = ref_linear_interp(Ph_segment_id, Ph_ref_azimuth_cat)
-
-    '''
-    plt.scatter(lat_utm,Ph_ref_azimuth)
-    plt.scatter(lat_utm,Ph_ref_azimuth_cat)
-    plt.show()
-    '''
     
+    # satellite altitude on per photon level
+    Ph_sat_alt_cat = altitude_sc[np.searchsorted(segment_id, Ph_segment_id)]
+    Ph_sat_alt = ref_linear_interp(Ph_segment_id, Ph_sat_alt_cat)
+
     # Aggregate data into dataframe
-    dataset_sea = pd.DataFrame({'latitude': lat_utm, 'longitude': lon_utm, 'photon_height': photon_h, 'confidence':conf, 'ref_elevation':Ph_ref_elev, 'ref_azminuth':Ph_ref_azimuth}, 
-                           columns=['latitude', 'longitude', 'photon_height', 'confidence', 'ref_elevation', 'ref_azminuth'])
+    dataset_sea = pd.DataFrame({'latitude': lat_utm, 'longitude': lon_utm, 'photon_height': photon_h, 'confidence':conf, 'ref_elevation':Ph_ref_elev, 'ref_azminuth':Ph_ref_azimuth, 'ref_sat_alt':Ph_sat_alt}, 
+                           columns=['latitude', 'longitude', 'photon_height', 'confidence', 'ref_elevation', 'ref_azminuth', 'ref_sat_alt'])
     
     #plt.scatter(lat_utm, photon_h, c='black', s=0.1, alpha=0.1)
     #plt.show()
@@ -152,8 +154,9 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
         waterTemp = 20
 
     # Correct for refraction 
-    RefX, RefY, RefZ, RefConf, rawX, rawY, rawZ, ph_ref_azi, ph_ref_elev = RefractionCorrection(waterTemp, WSHeight, 532, dataset_sea1.ref_elevation, dataset_sea1.ref_azminuth, dataset_sea1.photon_height, dataset_sea1.longitude, dataset_sea1.latitude, dataset_sea1.confidence, mean_altitude)
-
+    print('refrac correction')
+    RefX, RefY, RefZ, RefConf, rawX, rawY, rawZ, ph_ref_azi, ph_ref_elev = RefractionCorrection(waterTemp, WSHeight, 532, dataset_sea1.ref_elevation, dataset_sea1.ref_azminuth, dataset_sea1.photon_height, dataset_sea1.longitude, dataset_sea1.latitude, dataset_sea1.confidence, dataset_sea1.ref_sat_alt)
+    
     # Find bathy depth
     depth = WSHeight - RefZ
 

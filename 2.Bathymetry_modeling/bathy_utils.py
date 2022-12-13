@@ -270,7 +270,7 @@ def get_water_temp(data_path, latitude, longitude):
     water_temp = dataset['analysed_sst'][0,new_lat, new_lon] - 273.15
     return water_temp
 
-def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azimuth, PhotonZ, PhotonX, PhotonY, Ph_Conf, mean_altitude):
+def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azimuth, PhotonZ, PhotonX, PhotonY, Ph_Conf, satellite_altitude):
     
     '''
     WTemp; there is python library that pulls water temp data 
@@ -282,6 +282,7 @@ def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azi
     PhotonX = PhotonX[PhotonZ<=WSmodel]
     PhotonY = PhotonY[PhotonZ<=WSmodel]
     Photon_ref_elev = Photon_ref_elev[PhotonZ<=WSmodel]
+    satellite_altitude = satellite_altitude[PhotonZ<=WSmodel]
     Ph_ref_azimuth = Ph_ref_azimuth[PhotonZ<=WSmodel]
     Ph_Conf = Ph_Conf[PhotonZ<=WSmodel]
     PhotonZ = PhotonZ[PhotonZ<=WSmodel]
@@ -311,18 +312,18 @@ def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azi
     
     # read photon ref_elev to get theta1
     # Does not account for curvature of Earth
-    theta1 = np.pi/2 - Photon_ref_elev
+    # theta1 = np.pi/2 - Photon_ref_elev
     
     # H = orbital altitude of IS2 (496km as mean)
     # H = 496km. we pass in the mean of the orbit from /geolocation/altitude_sc/
     # Diff from min to max of 100m over an orbit is 0.02% at 496km
     # More error probably introduced from Re (mean Earth radius) than intra-orbit changes in altitude
     # H = 496
-    #H = mean_altitude/1000
+    H = satellite_altitude/1000
     # Re = Radius of Earth (6371km mean)
-    # Re = 6371
+    Re = 6371
     
-    # theta1 = np.arctan((H*np.tan(theta1))/Re)
+    theta1 = np.arctan((H*np.tan(theta1))/Re)
     
     # eq 1. Theta2
     theta2 = np.arcsin(((n1*np.sin(theta1))/n2))
