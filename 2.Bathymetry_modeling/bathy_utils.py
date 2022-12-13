@@ -59,6 +59,7 @@ def ReadATL03(h5_file, laser_num):
     ref_azimuth = f['/' + laser + '/geolocation/ref_azimuth'][...,]
     ph_index_beg = f['/' + laser + '/geolocation/ph_index_beg'][...,]
     segment_id = f['/' + laser + '/geolocation/segment_id'][...,]
+    altitude_sc = f['/' + laser + '/geolocation/altitude_sc'][...,]
     
     return latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id
 
@@ -267,7 +268,7 @@ def get_water_temp(data_path, latitude, longitude):
     water_temp = dataset['analysed_sst'][0,new_lat, new_lon] - 273.15
     return water_temp
 
-def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azimuth, PhotonZ, PhotonX, PhotonY, Ph_Conf):
+def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azimuth, PhotonZ, PhotonX, PhotonY, Ph_Conf, mean_alttude):
     
     '''
     WTemp; there is python library that pulls water temp data 
@@ -310,7 +311,10 @@ def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azi
     # Does not account for curvature of Earth
     theta1 = np.pi/2 - Photon_ref_elev
     # H = orbital altitude of IS2 (496km as mean)
-    H = 496
+    # H = 496km. we pass in the mean of the orbit from /geolocation/altitude_sc/
+    # Diff from min to max of 100m over an orbit is 0.02% at 496km
+    # More error probably introduced from Re (mean Earth radius) than intra-orbit changes in altitude
+    H = mean_altitude
     # Re = Radius of Earth (6371km mean)
     Re = 6371
     

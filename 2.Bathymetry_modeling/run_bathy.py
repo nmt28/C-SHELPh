@@ -75,7 +75,9 @@ def main():
 #         os._exit(1)
     
     # Read in the data
-    latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id = ReadATL03(args.input, args.laser)
+    latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id, altitude_sc = ReadATL03(args.input, args.laser)
+    
+    mean_altitude = np.mean(altitude_sc)
     
     # Find the epsg code
     epsg_code = convert_wgs_to_utm(longitude[0], latitude[0])
@@ -144,7 +146,7 @@ def main():
         waterTemp = 20
 
     # Correct for refraction 
-    RefX, RefY, RefZ, RefConf, rawX, rawY, rawZ, ph_ref_azi, ph_ref_elev = RefractionCorrection(waterTemp, WSHeight, 532, dataset_sea1.ref_elevation, dataset_sea1.ref_azminuth, dataset_sea1.photon_height, dataset_sea1.longitude, dataset_sea1.latitude, dataset_sea1.confidence)
+    RefX, RefY, RefZ, RefConf, rawX, rawY, rawZ, ph_ref_azi, ph_ref_elev = RefractionCorrection(waterTemp, WSHeight, 532, dataset_sea1.ref_elevation, dataset_sea1.ref_azminuth, dataset_sea1.photon_height, dataset_sea1.longitude, dataset_sea1.latitude, dataset_sea1.confidence, mean_altitude)
 
     # Find bathy depth
     depth = WSHeight - RefZ
