@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+'''
+THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'''
 
 #####
 # This group of functions processes ICESAT2 data and creates a bathymetric model. 
@@ -310,16 +312,17 @@ def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azi
     # read photon ref_elev to get theta1
     # Does not account for curvature of Earth
     theta1 = np.pi/2 - Photon_ref_elev
+    
     # H = orbital altitude of IS2 (496km as mean)
     # H = 496km. we pass in the mean of the orbit from /geolocation/altitude_sc/
     # Diff from min to max of 100m over an orbit is 0.02% at 496km
     # More error probably introduced from Re (mean Earth radius) than intra-orbit changes in altitude
-    H = 496
+    # H = 496
     #H = mean_altitude/1000
     # Re = Radius of Earth (6371km mean)
-    Re = 6371
+    # Re = 6371
     
-    theta1 = np.arctan((H*np.tan(theta1))/Re)
+    # theta1 = np.arctan((H*np.tan(theta1))/Re)
     
     # eq 1. Theta2
     theta2 = np.arcsin(((n1*np.sin(theta1))/n2))
