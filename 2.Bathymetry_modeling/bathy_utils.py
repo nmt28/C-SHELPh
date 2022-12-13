@@ -306,8 +306,15 @@ def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azi
     CorrectionCoef = (1-(n1/n2))
     #########################
     
-    #read photon ref_elev to get theta1
+    # read photon ref_elev to get theta1
+    # Does not account for curvature of Earth
     theta1 = np.pi/2 - Photon_ref_elev
+    # H = orbital altitude of IS2 (496km as mean)
+    H = 496
+    # Re = Radius of Earth (6371km mean)
+    Re = 6371
+    
+    theta1 = np.arctan((H*np.tan(theta1))/Re)
     
     # eq 1. Theta2
     theta2 = np.arcsin(((n1*np.sin(theta1))/n2))
