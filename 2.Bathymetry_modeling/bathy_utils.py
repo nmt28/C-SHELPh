@@ -156,8 +156,12 @@ def ref_linear_interp(x, y):
             sub = np.full((len(idx)), min)
             arr.append(sub)
         else:
-            sub = np.linspace(min, max, len(idx))
-            arr.append(sub)
+            sub_tmp = np.linspace(min, max, len(idx))
+            if len(sub_tmp)>1:
+                sub = np.linspace(sub_tmp[1], sub_tmp[-1], len(idx))
+                arr.append(sub)
+            else:
+                arr.append(sub_tmp)
 
     return np.concatenate(arr, axis=None).ravel()
 
@@ -312,7 +316,7 @@ def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azi
     
     # read photon ref_elev to get theta1
     # Does not account for curvature of Earth
-    # theta1 = np.pi/2 - Photon_ref_elev
+    theta1 = np.pi/2 - Photon_ref_elev
     
     # H = orbital altitude of IS2 (496km as mean)
     # H = 496km. we pass in the mean of the orbit from /geolocation/altitude_sc/

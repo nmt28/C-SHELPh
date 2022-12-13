@@ -12,4 +12,4 @@ A git repo to keep track of automatic retrieval of bathy photons and perform ML 
 
 4.Documents: Basic tutorial on using C-SHELPh
 
-Note: The refraction correction currently uses photon level metrics (photon azimuth, photon elevation, satellite elev) to get an as accurate bathymetric model as possible. However, there is a small 'stepping' between IS2 segment id's. This is considered negligle given the quantities of data involved and value of the 'step' against the scale of the units
+Note: The refraction correction currently uses photon level metrics (photon azimuth, photon elevation, satellite elev) to get an as accurate bathymetric model as possible. This requires some assuptions about the spacecraft orbit (its vertical movements are a constant rate thus linear interpolation holds true) and geometry and radius of the Earth. Ultimately, the advantages of increased precision of this implementation are believed to outweigh uncertainty introduced by the assumption.
