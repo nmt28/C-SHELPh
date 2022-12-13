@@ -9,4 +9,4 @@ run\_bathy.py: Calls the functions from Bathy\_utils.py in order to extract bath
 
 create\_run\_shell.py: A helper script to iterate over a range of threshold values and IS2 lasers. Creates run\_bathy.sh.
 
-Note: The refraction correction currently uses a simplificatio of the incidence angle as outlined by Parrish et al, 2019. For greater precision, the curvature of the Earth needs to be accounted for along teh ICESat-2 track. This will be integrated into C-SHELPh as time permits.
+Note: The refraction correction currently uses a simplification of the incidence angle (theta1) as outlined by Parrish et al, 2019. For greater precision, the curvature of the Earth needs to be accounted for along the ICESat-2 track. This will be integrated into C-SHELPh as time permits.
