@@ -88,55 +88,28 @@ def OrthometricCorrection(lat, lon, Z, epsg):
     
     return Y_utm, X_utm, Z_egm08
 
-
-def getAtl03SegID(atl03_ph_index_beg, atl03_segment_id, atl03_heights_len): 
-    # Snippet from PhoReal, authored by Eric Guenther (via Amy Neuenschwander) 
-	# for assigning photons to a segment
-	# The PhoReal notice is preserved here:
-	# Copyright 2020 University of Texas at Austin
-	# This package is free software; the copyright holder gives unlimited permission to copy and/or 
-	# distribute, with or without modification, as long as this notice is preserved.
-
-    # We need to know spacecraft orbin info, which is provided across segments. This first function assigns photons to the segmenet they belong to. We end up making a new array
-    # that has more points to match the photon. Segment is defined as every 100m in the long track.
+def find_photon_seg_id(ph_index_beg, segment_id, photon_h):
+    # remove 0s in segment_id
+    segment_id = segment_id[ph_index_beg!=0]
+    ph_index_beg = ph_index_beg[ph_index_beg!=0]
     
-    # Filter all data where atl03_ph_index starts at 0 (0 indicates errors)
-    indsNotZero = atl03_ph_index_beg != 0
-    atl03_ph_index_beg = atl03_ph_index_beg[indsNotZero]
-    atl03_segment_id = atl03_segment_id[indsNotZero]
+    # add an extra val at the end of array for bounds
+    ph_index_beg = np.hstack((ph_index_beg, len(photon_h)+1))-1
     
-    # Subtract 1 from ph_index_beg to start at python 0th pos
-    atl03_ph_index_beg = atl03_ph_index_beg - 1
+    photon_id = []
+    #iterate over the len of ph_index_beg
+    for i, num in enumerate(np.arange(0, len(ph_index_beg)-1, 1)):
+        # count number of photons in the bin
+        count = len(photon_h[ph_index_beg[i]:ph_index_beg[i+1]])
+        # create a list of segment_id vals for x in the bin
+        tmp = [segment_id[i] for x in range(count)]
+        # append to master list
+        photon_id.append(tmp)
+    # flatten master list to 1d array
+    photon_id = np.hstack(photon_id)
     
-    # Sometimes the ph_index_beg is not at the 0th position, it is is not,
-    # add it in and then add the associated segment id
-    # Warning, this is assuming that the segment id for the points are from
-    # the segment id directly before it, this assumption might fail but I have
-    # not come across a case yet where it does.  If you want to play it safe
-    # you could comment this section out and then if the first position is not
-    # 0 then all photons before the first position will not be assigned a
-    # segment id.
-    # if atl03_ph_index_beg[0] != 0:
-    #     atl03_ph_index_beg = np.append(0,atl03_ph_index_beg)
-    #     first_seg_id = atl03_segment_id[0] -1
-    #     atl03_segment_id = np.append(first_seg_id,atl03_segment_id)
+    return photon_id
     
-    
-    # Append atl03_height_len to end of array for final position
-    atl03_ph_index_beg = np.append(atl03_ph_index_beg,atl03_heights_len)
-    
-    # Make array equal to the length of the atl03_heights photon level data
-    ph_segment_id = np.zeros(atl03_heights_len)
-    
-    # Iterate through ph_index_beg, from the first to second to last number
-    # and set the photons between ph_index_beg i to ph_index_beg i + 1 to
-    # segment id i
-    for i in range(0,len(atl03_ph_index_beg) - 1):
-        ph_segment_id[atl03_ph_index_beg[i]:atl03_ph_index_beg[i+1]] = atl03_segment_id[i]
-    
-    # Return list of segment_id at the photon level
-    return ph_segment_id
-
 def ref_linear_interp(x, y):
 
     arr = []

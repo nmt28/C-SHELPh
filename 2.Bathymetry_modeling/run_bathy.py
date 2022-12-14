@@ -81,7 +81,7 @@ def main():
 THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''')
     
     # Read in the data
-    latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id, alt_sc = ReadATL03(args.input, args.laser)
+    latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_start, segment_idx, alt_sc = ReadATL03(args.input, args.laser)
     
     alt_sc = np.where(alt_sc>700000, np.nan, alt_sc)
     
@@ -96,39 +96,36 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
     epsg_num = int(epsg_code.split(':')[-1])
     # Orthometrically correct the data using the epsg code
     lat_utm, lon_utm, photon_h = OrthometricCorrection(latitude, longitude, photon_h, epsg_code)
-    # Get ref-elev and ref_azimuth at photon level
-    # Get length of photon array
-    heights_len = len(photon_h)
     # Assign segment id to each photon for the segment it is in
-    Ph_segment_id = getAtl03SegID(ph_index_beg, segment_id, heights_len)
+    Ph_id_per_seg = find_photon_seg_id(ph_index_start, segment_idx, photon_h)
     # Cast as an int
-    Ph_segment_id = Ph_segment_id.astype(np.int64)
-    
+    Ph_id_per_seg = Ph_id_per_seg.astype(np.int64)
+    # Get ref-elev and ref_azimuth at photon level
     # Ref_elev on a per photon level (assign seg ref_elev to photons)
     # np.searchsorted: counts number of elements in arrA less than x for x in ArrB
-    # segment_id = [1,1,1,2,2,3,3,3]
-    # Ph_segment_id = [1,2,3]
-    # so for x in segment_id, how many elements in Ph_segment_id are less than x
+    # segment_idx = [1,1,1,2,2,3,3,3]
+    # Ph_segment_idx = [1,2,3]
+    # so for x in segment_idx, how many elements in Ph_segment_idx are less than x
     # in this case 0 values are less than 1, 1 value (number 1) is less than 2 and 2 values (numbers 1 and 2) are less than 3
     #
-    # thus:        ref_elev_cat = np.searchsorted(segment_id, Ph_segment_id, sorter=segment_id.argsort()) 
-    # gives:       [0,0,0,1,1,2,2,2], thus converting segment_id to an idx arr
+    # thus:        ref_elev_cat = np.searchsorted(segment_idx, Ph_segment_idx, sorter=segment_idx.argsort()) 
+    # gives:       [0,0,0,1,1,2,2,2], thus converting segment_idx to an idx arr
     # then this is mapped over our ref_elev to convert ref_elev from segement to photon scale
     # such as:     ref_elev = [0.1,0.2,0.3]
     # thus:        ph_ref_elev = ref_elev[ref_elev_cat]
     # giving:     [0.1,0.1,0.1,0.2,0.2,0.3,0.3,0.3]
     # this is then ready for linear interpolation
     
-    Ph_ref_elev_cat = ref_elev[np.searchsorted(segment_id, Ph_segment_id, sorter=segment_id.argsort())]
-    Ph_ref_elev = ref_linear_interp(Ph_segment_id, Ph_ref_elev_cat)
+    Ph_ref_elev_cat = ref_elev[np.searchsorted(segment_idx, Ph_id_per_seg, sorter=segment_idx.argsort())]
+    Ph_ref_elev = ref_linear_interp(Ph_id_per_seg, Ph_ref_elev_cat)
     
     # Ref_azimuth on a per photon level (assign seg ref_azimuth to photons)
-    Ph_ref_azimuth_cat = ref_azimuth[np.searchsorted(segment_id, Ph_segment_id, sorter=segment_id.argsort())]
-    Ph_ref_azimuth = ref_linear_interp(Ph_segment_id, Ph_ref_azimuth_cat)
+    Ph_ref_azimuth_cat = ref_azimuth[np.searchsorted(segment_idx, Ph_id_per_seg, sorter=segment_idx.argsort())]
+    Ph_ref_azimuth = ref_linear_interp(Ph_id_per_seg, Ph_ref_azimuth_cat)
     
     # satellite altitude on per photon level
-    Ph_sat_alt_cat = altitude_sc[np.searchsorted(segment_id, Ph_segment_id, sorter=segment_id.argsort())]
-    Ph_sat_alt = ref_linear_interp(Ph_segment_id, Ph_sat_alt_cat)
+    Ph_sat_alt_cat = altitude_sc[np.searchsorted(segment_idx, Ph_id_per_seg, sorter=segment_idx.argsort())]
+    Ph_sat_alt = ref_linear_interp(Ph_id_per_seg, Ph_sat_alt_cat)
 
     # Aggregate data into dataframe
     dataset_sea = pd.DataFrame({'latitude': lat_utm, 'longitude': lon_utm, 'photon_height': photon_h, 'confidence':conf, 'ref_elevation':Ph_ref_elev, 'ref_azminuth':Ph_ref_azimuth, 'ref_sat_alt':Ph_sat_alt}, 
