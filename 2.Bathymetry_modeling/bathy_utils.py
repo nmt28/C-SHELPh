@@ -37,6 +37,7 @@ import fiona
 import geopandas
 import netCDF4
 from datetime import datetime
+import utm
 
 def ReadATL03(h5_file, laser_num):
     # Read File
@@ -64,18 +65,17 @@ def ReadATL03(h5_file, laser_num):
     altitude_sc = f['/' + laser + '/geolocation/altitude_sc'][...,]
     
     return latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id, altitude_sc
-
-# convert_wgs_to_utm function, see https://stackoverflow.com/a/40140326/4556479
-def convert_wgs_to_utm(lon: float, lat: float):
-    """Based on lat and lng, return best utm epsg-code"""
-    utm_band = str((math.floor((lon + 180) / 6 ) % 60) + 1)
-    if len(utm_band) == 1:
-        utm_band = '0'+utm_band
-    if lat >= 0:
-        epsg_code = 'epsg:326' + utm_band
-        return epsg_code
-    epsg_code = 'epsg:327' + utm_band
-    return epsg_code
+    
+def convert_wgs_to_utm(lat, lon):
+	easting, northing, num, letter = utm.from_latlon(lat, lon)
+	if letter > 'N':
+		epsg = 'epsg:327' + str(num)
+	elif letter < 'N':
+		epsg = 'epsg:326' + str(num)
+	else:
+		print('Error Finding UTM')
+		
+	return epsg
 
 def OrthometricCorrection(lat, lon, Z, epsg):
     # transform ellipsod (WGS84) height to orthometric height
@@ -88,9 +88,15 @@ def OrthometricCorrection(lat, lon, Z, epsg):
     
     return Y_utm, X_utm, Z_egm08
 
-# Snippet by Eric Guenther (via Amy N.) for assigning photons to a segment
+
 def getAtl03SegID(atl03_ph_index_beg, atl03_segment_id, atl03_heights_len): 
-    
+    # Snippet from PhoReal, authored by Eric Guenther (via Amy Neuenschwander) 
+	# for assigning photons to a segment
+	# The PhoReal notice is preserved here:
+	# Copyright 2020 University of Texas at Austin
+	# This package is free software; the copyright holder gives unlimited permission to copy and/or 
+	# distribute, with or without modification, as long as this notice is preserved.
+
     # We need to know spacecraft orbin info, which is provided across segments. This first function assigns photons to the segmenet they belong to. We end up making a new array
     # that has more points to match the photon. Segment is defined as every 100m in the long track.
     
