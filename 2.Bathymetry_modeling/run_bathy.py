@@ -81,14 +81,18 @@ def main():
 THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''')
     
     # Read in the data
-    latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id, altitude_sc = ReadATL03(args.input, args.laser)
+    latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id, alt_sc = ReadATL03(args.input, args.laser)
     
-    altitude_sc = np.where(altitude_sc>700000, np.nan, altitude_sc)
+    alt_sc = np.where(alt_sc>700000, np.nan, alt_sc)
     
-    altitude_sc[np.isnan(altitude_sc)] = np.nanmedian(altitude_sc)
+    alt_sc[np.isnan(alt_sc)] = np.nanmedian(alt_sc)
+    
+    alt_df = pd.DataFrame(alt_sc)
+
+    altitude_sc = alt_df.interpolate().values.flatten()
     
     # Find the epsg code
-    epsg_code = convert_wgs_to_utm(longitude[0], latitude[0])
+    epsg_code = convert_wgs_to_utm(latitude[0], longitude[0])
     epsg_num = int(epsg_code.split(':')[-1])
     # Orthometrically correct the data using the epsg code
     lat_utm, lon_utm, photon_h = OrthometricCorrection(latitude, longitude, photon_h, epsg_code)
