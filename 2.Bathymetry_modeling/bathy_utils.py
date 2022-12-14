@@ -68,10 +68,10 @@ def ReadATL03(h5_file, laser_num):
     
 def convert_wgs_to_utm(lat, lon):
 	easting, northing, num, letter = utm.from_latlon(lat, lon)
-	if letter > 'N':
-		epsg = 'epsg:327' + str(num)
-	elif letter < 'N':
+	if letter >= 'N':
 		epsg = 'epsg:326' + str(num)
+	elif letter < 'N':
+		epsg = 'epsg:327' + str(num)
 	else:
 		print('Error Finding UTM')
 		
