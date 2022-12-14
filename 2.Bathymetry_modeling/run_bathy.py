@@ -105,15 +105,29 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
     Ph_segment_id = Ph_segment_id.astype(np.int64)
     
     # Ref_elev on a per photon level (assign seg ref_elev to photons)
-    Ph_ref_elev_cat = ref_elev[np.searchsorted(segment_id, Ph_segment_id)]
+    # np.searchsorted: counts number of elements in arrA less than x for x in ArrB
+    # segment_id = [1,1,1,2,2,3,3,3]
+    # Ph_segment_id = [1,2,3]
+    # so for x in segment_id, how many elements in Ph_segment_id are less than x
+    # in this case 0 values are less than 1, 1 value (number 1) is less than 2 and 2 values (numbers 1 and 2) are less than 3
+    #
+    # thus:        ref_elev_cat = np.searchsorted(segment_id, Ph_segment_id, sorter=segment_id.argsort()) 
+    # gives:       [0,0,0,1,1,2,2,2], thus converting segment_id to an idx arr
+    # then this is mapped over our ref_elev to convert ref_elev from segement to photon scale
+    # such as:     ref_elev = [0.1,0.2,0.3]
+    # thus:        ph_ref_elev = ref_elev[ref_elev_cat]
+    # giving:     [0.1,0.1,0.1,0.2,0.2,0.3,0.3,0.3]
+    # this is then ready for linear interpolation
+    
+    Ph_ref_elev_cat = ref_elev[np.searchsorted(segment_id, Ph_segment_id, sorter=segment_id.argsort())]
     Ph_ref_elev = ref_linear_interp(Ph_segment_id, Ph_ref_elev_cat)
     
     # Ref_azimuth on a per photon level (assign seg ref_azimuth to photons)
-    Ph_ref_azimuth_cat = ref_azimuth[np.searchsorted(segment_id, Ph_segment_id)]
+    Ph_ref_azimuth_cat = ref_azimuth[np.searchsorted(segment_id, Ph_segment_id, sorter=segment_id.argsort())]
     Ph_ref_azimuth = ref_linear_interp(Ph_segment_id, Ph_ref_azimuth_cat)
     
     # satellite altitude on per photon level
-    Ph_sat_alt_cat = altitude_sc[np.searchsorted(segment_id, Ph_segment_id)]
+    Ph_sat_alt_cat = altitude_sc[np.searchsorted(segment_id, Ph_segment_id, sorter=segment_id.argsort())]
     Ph_sat_alt = ref_linear_interp(Ph_segment_id, Ph_sat_alt_cat)
 
     # Aggregate data into dataframe
