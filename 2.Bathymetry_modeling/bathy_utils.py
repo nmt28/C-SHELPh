@@ -90,7 +90,7 @@ def OrthometricCorrection(lat, lon, Z, epsg):
     return Y_utm, X_utm, Z_egm08
 
     
-def count_ph_per_seg(ph_index_beg, photon_h):
+def count_ph_per_seg(ph_index_beg, photon_h): # DEPRECATED
     
     ph_index_beg = ph_index_beg[ph_index_beg!=0]
     
@@ -106,8 +106,7 @@ def count_ph_per_seg(ph_index_beg, photon_h):
     return photon_id
 
     
-def ref_linear_interp_new(photon_count, ref_elev):
-
+def ref_linear_interp(photon_count, ref_elev):
 
     arr = []
     for i in range(len(ref_elev)):
