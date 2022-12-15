@@ -81,7 +81,7 @@ def main():
 THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''')
     
     # Read in the data
-    latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_start, segment_idx, alt_sc = ReadATL03(args.input, args.laser)
+    latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_seg_beg, segment_id, alt_sc = ReadATL03(args.input, args.laser)
     
     alt_sc = np.where(alt_sc>700000, np.nan, alt_sc)
     
@@ -97,7 +97,7 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
     # Orthometrically correct the data using the epsg code
     lat_utm, lon_utm, photon_h = OrthometricCorrection(latitude, longitude, photon_h, epsg_code)
     # Assign segment id to each photon for the segment it is in
-    Ph_id_per_seg = find_photon_seg_id(ph_index_start, segment_idx, photon_h)
+    Ph_id_per_seg = find_photon_seg_id(ph_seg_beg, segment_id, photon_h)
     # Cast as an int
     Ph_id_per_seg = Ph_id_per_seg.astype(np.int64)
     # Get ref-elev and ref_azimuth at photon level
