@@ -63,8 +63,9 @@ def ReadATL03(h5_file, laser_num):
     ph_index_beg = f['/' + laser + '/geolocation/ph_index_beg'][...,]
     segment_id = f['/' + laser + '/geolocation/segment_id'][...,]
     altitude_sc = f['/' + laser + '/geolocation/altitude_sc'][...,]
+    seg_ph_count = f['/' + laser + '/geolocation/segment_ph_cnt'][...,]
     
-    return latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id, altitude_sc
+    return latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id, altitude_sc, seg_ph_count
     
 def convert_wgs_to_utm(lat, lon):
 	easting, northing, num, letter = utm.from_latlon(lat, lon)
@@ -428,7 +429,7 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     fig = plt.rcParams["figure.figsize"] = (40,5)
     
     # Plot raw points
-    #plt.scatter(x=binned_data.latitude, y = binned_data.photon_height, marker='o', lw=0, s=1, alpha = 0.8, c = 'yellow', label ='Raw photon height')
+    plt.scatter(x=binned_data.latitude, y = binned_data.photon_height, marker='o', lw=0, s=1, alpha = 0.8, c = 'yellow', label ='Raw photon height')
     plt.scatter(RefY, RefZ, s=0.2, alpha=0.1, c='black')
     plt.scatter(geo_df.latitude, geo_df.photon_height, s=0.5, alpha=0.1, c='red', label = 'Classified Photons')
     

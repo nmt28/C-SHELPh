@@ -81,45 +81,19 @@ def main():
 THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''')
     
     # Read in the data
-    latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id, alt_sc = ReadATL03(args.input, args.laser)
+    latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id, alt_sc, seg_ph_count = ReadATL03(args.input, args.laser)
     
     # Find the epsg code
     epsg_code = convert_wgs_to_utm(latitude[0], longitude[0])
     epsg_num = int(epsg_code.split(':')[-1])
     # Orthometrically correct the data using the epsg code
     lat_utm, lon_utm, photon_h = OrthometricCorrection(latitude, longitude, photon_h, epsg_code)
-    # count number of photons in each segment
-    Ph_num_per_seg = count_ph_per_seg(ph_index_beg, photon_h)
+    # count number of photons in each segment: DEPRECATED
+    #Ph_num_per_seg = count_ph_per_seg(ph_index_beg, photon_h)
+    Ph_num_per_seg = seg_ph_count[ph_index_beg>0]
     # Cast as an int
     Ph_num_per_seg = Ph_num_per_seg.astype(np.int64)
-    
-    
-    ##################### OLD ###################
-    # Get ref-elev and ref_azimuth at photon level
-    # Ref_elev on a per photon level (assign seg ref_elev to photons)
-    # np.searchsorted: counts number of elements in arrA less than x for x in ArrB
-    # segment_idx = [1,1,1,2,2,3,3,3]
-    # Ph_segment_idx = [1,2,3]
-    # so for x in segment_idx, how many elements in Ph_segment_idx are less than x
-    # in this case 0 values are less than 1, 1 value (number 1) is less than 2 and 2 values (numbers 1 and 2) are less than 3
-    #
-    # thus:        ref_elev_cat = np.searchsorted(segment_idx, Ph_segment_idx, sorter=segment_idx.argsort()) 
-    # gives:       [0,0,0,1,1,2,2,2], thus converting segment_idx to an idx arr
-    # then this is mapped over our ref_elev to convert ref_elev from segement to photon scale
-    # such as:     ref_elev = [0.1,0.2,0.3]
-    # thus:        ph_ref_elev = ref_elev[ref_elev_cat]
-    # giving:     [0.1,0.1,0.1,0.2,0.2,0.3,0.3,0.3]
-    # this is then ready for linear interpolation
-    #Ph_ref_elev_cat = ref_elev[np.searchsorted(segment_idx, Ph_id_per_seg, sorter=segment_idx.argsort())]
-    #Ph_ref_elev = ref_linear_interp(Ph_id_per_seg, Ph_ref_elev_cat)
-    # Ref_azimuth on a per photon level (assign seg ref_azimuth to photons)
-    #Ph_ref_azimuth_cat = ref_azimuth[np.searchsorted(segment_idx, Ph_id_per_seg, sorter=segment_idx.argsort())]
-    #Ph_ref_azimuth = ref_linear_interp(Ph_id_per_seg, Ph_ref_azimuth_cat)
-    # satellite altitude on per photon level
-    #Ph_sat_alt_cat = altitude_sc[np.searchsorted(segment_idx, Ph_id_per_seg, sorter=segment_idx.argsort())]
-    #Ph_sat_alt = ref_linear_interp(Ph_id_per_seg, Ph_sat_alt_cat)
-    ################################################
-    
+        
     # count_ph_per_seg() function removes zeros from ph_index_beg
     # These 0s are nodata vals in other params (ref_elev etc)
     # Thus no pre-processing is needed as it will map correctly given the nodata values are eliminated
@@ -179,10 +153,10 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
     dataset_bath = pd.DataFrame({'latitude': rawY, 'longitude': rawX, 'cor_latitude':RefY, 'cor_longitude':RefX, 'cor_photon_height':RefZ, 'photon_height': rawZ, 'confidence':RefConf, 'depth':depth}, 
                        columns=['latitude', 'longitude', 'photon_height', 'cor_latitude','cor_longitude', 'cor_photon_height', 'confidence', 'depth'])
 
-#     # Export dataframe to gpkg
-#     geodf = geopandas.GeoDataFrame(dataset_bath, geometry=geopandas.points_from_xy(dataset_bath.longitude, dataset_bath.latitude))
+     # Export dataframe to gpkg
+    #geodf = geopandas.GeoDataFrame(dataset_bath, geometry=geopandas.points_from_xy(dataset_bath.longitude, dataset_bath.latitude))
     file = args.input
-#     geodf.to_file(file + ".gpkg", driver="GPKG")
+    #geodf.to_file(file + ".gpkg", driver="GPKG")
     
     # Bin dataset again for bathymetry
     binned_data = bin_data(dataset_bath, args.lat_res, args.h_res)
@@ -193,7 +167,7 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
     # Create figure
     plt.close()
     produce_figures(binned_data, bath_height, sea_height, 10, -20, args.thresh, file, geo_df, RefY, RefZ, args.laser, epsg_num)
-
+    
 if __name__ == '__main__':
     main()
 
