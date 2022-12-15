@@ -88,14 +88,9 @@ def OrthometricCorrection(lat, lon, Z, epsg):
     
     return Y_utm, X_utm, Z_egm08
 
-def find_photon_seg_id(ph_index_beg, segment_id, photon_h):
-    # segment_id = index val of the segment (could be 10, 'A', just a label)
-    # ph_index_beg = photon idx (number) at start of a given segment 
-    # (eg. the first photon of seg 'A' is 4053, seg 'B' is 4075)
-    # thus we know there are 22 photons in seg A (which we find in loop below)
     
-    # remove 0s in segment_id
-    segment_id = segment_id[ph_index_beg!=0]
+def count_ph_per_seg(ph_index_beg, photon_h):
+    
     ph_index_beg = ph_index_beg[ph_index_beg!=0]
     
     # add an extra val at the end of array for upper bounds
@@ -104,48 +99,38 @@ def find_photon_seg_id(ph_index_beg, segment_id, photon_h):
     photon_id = []
     #iterate over the photon indexes (ph_index_beg)
     for i, num in enumerate(np.arange(0, len(ph_index_beg)-1, 1)):
-        # count photons where idx is between photon idx at start of one bin to the next
-        # eg: 4053:4075 (22 values)
-        count = len(photon_h[ph_index_beg[i]:ph_index_beg[i+1]])
-        # create a list of segment_id vals for x in the bin
-        # Assign 'A' to the 22 values found
-        tmp = [segment_id[i] for x in range(count)]
-        # append to master list
-        photon_id.append(tmp)
-    # flatten master list to 1d array
-    photon_id = np.hstack(photon_id)
+        photon_id.append(len(photon_h[ph_index_beg[i]:ph_index_beg[i+1]]))
+    photon_id = np.array(photon_id)
     
-    # returns array of photons each with a segment id they belong to
     return photon_id
+
     
-def ref_linear_interp(x, y):
+def ref_linear_interp_new(photon_count, ref_elev):
+
 
     arr = []
-
-    ux=np.unique(x) #unique x values
-    for u in ux:
-        idx = y[x==u]
+    for i in range(len(ref_elev)):
         try:
-            min = y[x==u-1][0]
-            max = y[x==u][0]
+            min = ref_elev[i-1]
+            max = ref_elev[i]
         except:
-            min = y[x==u][0]
-            max = y[x==u][0]
+            min = ref_elev[i]
+            max = ref_elev[i]
             
         try:
-            min = y[x==u][0]
-            max = y[x==u+1][0]
+            min = ref_elev[i]
+            max = ref_elev[i+1]
         except:
-            min = y[x==u][0]
-            max = y[x==u][0]
+            min = ref_elev[i]
+            max = ref_elev[i]
         
         if min==max:
-            sub = np.full((len(idx)), min)
+            sub = np.full((photon_count[i]), min)
             arr.append(sub)
         else:
-            sub_tmp = np.linspace(min, max, len(idx))
+            sub_tmp = np.linspace(min, max, photon_count[i]+1)
             if len(sub_tmp)>1:
-                sub = np.linspace(sub_tmp[1], sub_tmp[-1], len(idx))
+                sub = np.linspace(sub_tmp[1], sub_tmp[-1], photon_count[i])
                 arr.append(sub)
             else:
                 arr.append(sub_tmp)
@@ -443,7 +428,7 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     fig = plt.rcParams["figure.figsize"] = (40,5)
     
     # Plot raw points
-    plt.scatter(x=binned_data.latitude, y = binned_data.photon_height, marker='o', lw=0, s=1, alpha = 0.8, c = 'yellow', label ='Raw photon height')
+    #plt.scatter(x=binned_data.latitude, y = binned_data.photon_height, marker='o', lw=0, s=1, alpha = 0.8, c = 'yellow', label ='Raw photon height')
     plt.scatter(RefY, RefZ, s=0.2, alpha=0.1, c='black')
     plt.scatter(geo_df.latitude, geo_df.photon_height, s=0.5, alpha=0.1, c='red', label = 'Classified Photons')
     
