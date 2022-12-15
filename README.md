@@ -1,4 +1,4 @@
-# C-SHELPh
+# C-SHELPh V2
 
 [![DOI](https://zenodo.org/badge/374786622.svg)](https://zenodo.org/badge/latestdoi/374786622)
 
