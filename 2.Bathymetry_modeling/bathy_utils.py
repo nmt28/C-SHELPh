@@ -89,25 +89,36 @@ def OrthometricCorrection(lat, lon, Z, epsg):
     return Y_utm, X_utm, Z_egm08
 
 def find_photon_seg_id(ph_index_beg, segment_id, photon_h):
+    # segment_id = index val of the segment (could be 10, 'A', just a label)
+    # ph_index_beg = photon idx (number) at start of a given segment 
+    # (eg. the first photon of seg 'A' is 4053, seg 'B' is 4075)
+    # thus we know there are 22 photons in seg A (which we find in loop below)
+    
     # remove 0s in segment_id
     segment_id = segment_id[ph_index_beg!=0]
     ph_index_beg = ph_index_beg[ph_index_beg!=0]
     
-    # add an extra val at the end of array for bounds
-    ph_index_beg = np.hstack((ph_index_beg, len(photon_h)+1))-1
+    # add an extra val at the end of array for upper bounds
+    ph_index_beg_tmp = np.hstack((ph_index_beg, len(photon_h)+1))-1
+    ph_index_beg_idx = ph_index_beg_tmp[1]
+    #print('id1 = ', ph_index_beg_tmp[0],ph_index_beg_tmp[1],ph_index_beg_tmp[2],ph_index_beg_tmp[3])
+    ph_index_beg = ph_index_beg_tmp - ph_index_beg_idx
     
     photon_id = []
-    #iterate over the len of ph_index_beg
+    #iterate over the photon indexes (ph_index_beg)
     for i, num in enumerate(np.arange(0, len(ph_index_beg)-1, 1)):
-        # count number of photons in the bin
+        # count photons where idx is between photon idx at start of one bin to the next
+        # eg: 4053:4075 (22 values)
         count = len(photon_h[ph_index_beg[i]:ph_index_beg[i+1]])
         # create a list of segment_id vals for x in the bin
+        # Assign 'A' to the 22 values found
         tmp = [segment_id[i] for x in range(count)]
         # append to master list
         photon_id.append(tmp)
     # flatten master list to 1d array
     photon_id = np.hstack(photon_id)
     
+    # returns array of photons each with a segment id they belong to
     return photon_id
     
 def ref_linear_interp(x, y):
@@ -435,7 +446,7 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     fig = plt.rcParams["figure.figsize"] = (40,5)
     
     # Plot raw points
-#     plt.scatter(x=binned_data.latitude, y = binned_data.photon_height, marker='o', lw=0, s=1, alpha = 0.8, c = 'yellow', label = 'Raw photon height')
+    plt.scatter(x=binned_data.latitude, y = binned_data.photon_height, marker='o', lw=0, s=1, alpha = 0.8, c = 'yellow', label ='Raw photon height')
     plt.scatter(RefY, RefZ, s=0.2, alpha=0.1, c='black')
     plt.scatter(geo_df.latitude, geo_df.photon_height, s=0.5, alpha=0.1, c='red', label = 'Classified Photons')
     
