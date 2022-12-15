@@ -99,10 +99,7 @@ def find_photon_seg_id(ph_index_beg, segment_id, photon_h):
     ph_index_beg = ph_index_beg[ph_index_beg!=0]
     
     # add an extra val at the end of array for upper bounds
-    ph_index_beg_tmp = np.hstack((ph_index_beg, len(photon_h)+1))-1
-    ph_index_beg_idx = ph_index_beg_tmp[1]
-    #print('id1 = ', ph_index_beg_tmp[0],ph_index_beg_tmp[1],ph_index_beg_tmp[2],ph_index_beg_tmp[3])
-    ph_index_beg = ph_index_beg_tmp - ph_index_beg_idx
+    ph_index_beg = np.hstack((ph_index_beg, len(photon_h)+1))-1
     
     photon_id = []
     #iterate over the photon indexes (ph_index_beg)
