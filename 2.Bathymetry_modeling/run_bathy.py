@@ -101,10 +101,10 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
     Ph_ref_azimuth = ref_linear_interp(Ph_num_per_seg, ref_azimuth[ph_index_beg>0])
     Ph_sat_alt = ref_linear_interp(Ph_num_per_seg, alt_sc[ph_index_beg>0]) 
     
-    plt.scatter(np.arange(1, len(Ph_ref_azimuth)+1, 1), Ph_ref_azimuth)
-    plt.show()
+    #plt.scatter(np.arange(1, len(Ph_ref_azimuth)+1, 1), Ph_ref_azimuth)
+    #plt.show()
     
-    '''
+    
     # Aggregate data into dataframe
     dataset_sea = pd.DataFrame({'latitude': lat_utm, 'longitude': lon_utm, 'photon_height': photon_h, 'confidence':conf, 'ref_elevation':Ph_ref_elev, 'ref_azminuth':Ph_ref_azimuth, 'ref_sat_alt':Ph_sat_alt}, 
                            columns=['latitude', 'longitude', 'photon_height', 'confidence', 'ref_elevation', 'ref_azminuth', 'ref_sat_alt'])
@@ -171,7 +171,7 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
     # Create figure
     plt.close()
     produce_figures(binned_data, bath_height, sea_height, 10, -20, args.thresh, file, geo_df, RefY, RefZ, args.laser, epsg_num)
-    '''
+    
 if __name__ == '__main__':
     main()
 
