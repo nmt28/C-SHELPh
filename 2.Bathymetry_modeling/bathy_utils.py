@@ -207,44 +207,44 @@ def get_water_temp(data_path, latitude, longitude):
     to the gridded tile ratio of the SST data product using the coordinates of the IS2 data.
     '''
     # Get date from data filename
-    date = data_path[-33:-25]
+    file_date = data_path[-33:-25]
     year = date[0:4]
     month = date[4:6]
     day = date[6:8]
-    day_of_year = str(datetime.strptime(date, '%Y%m%d').timetuple().tm_yday)
+    julian_day = str(datetime.strptime(date, '%Y%m%d').timetuple().tm_yday)
     # Add zero in front of day of year string
-    zero_day_of_year = day_of_year.zfill(3)
+    zero_julian_date = julian_day.zfill(3)
 
     # Calculate ratio of latitude from mid-point of IS2 track
-    old_lat = latitude.mean()
-    old_lat_min = -90
-    old_lat_max = 90
-    new_lat_min = 0
-    new_lat_max = 17998
+    lat_avg = latitude.mean()
+    lat_min = -90
+    lat_max = 90
+    scaled_lat_min = 0
+    scaled_lat_max = 17998
 
-    new_lat = round(((old_lat - old_lat_min) / (old_lat_max - old_lat_min)) * 
-                    (new_lat_max - new_lat_min) + new_lat_min)
+    new_lat_ratio = round(((lat_avg - lat_min) / (lat_max - lat_min)) * 
+                    (scaled_lat_max - scaled_lat_min) + scaled_lat_min)
 
     # Calculate ratio of longitude from mid-point of IS2 track
-    old_lon = longitude.mean()
-    old_lon_min = -180
-    old_lon_max = 180
-    new_lon_min = 0
-    new_lon_max = 35999
+    lon_avg = longitude.mean()
+    lon_min = -180
+    lon_max = 180
+    scaledlon_min = 0
+    scaledlon_max = 35999
 
-    new_lon = round(((old_lon - old_lon_min) / (old_lon_max - old_lon_min)) * 
-                    (new_lon_max - new_lon_min) + new_lon_min)
+    new_lon = round(((lon_avg - lon_min) / (lon_max - lon_min)) * 
+                    (scaled_lon_max - scaled_lon_min) + lon_min)
 
     # Access the SST data using the JPL OpenDap interface
     url = 'https://opendap.jpl.nasa.gov/opendap/OceanTemperature/ghrsst/data/GDS2/L4/GLOB/JPL/MUR/v4.1/'\
-        + str(year) + '/' + str(zero_day_of_year) + '/' + str(date) \
+        + str(year) + '/' + str(julian_day) + '/' + str(date) \
         + '090000-JPL-L4_GHRSST-SSTfnd-MUR-GLOB-v02.0-fv04.1.nc'
     
     dataset = netCDF4.Dataset(url)
     
     # Access the data and convert the temperature from K to C
-    water_temp = dataset['analysed_sst'][0,new_lat, new_lon] - 273.15
-    return water_temp
+    sea_temp = dataset['analysed_sst'][0,scaled_lat, scaled_lon] - 273.15
+    return sea_temp
 
 def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azimuth, PhotonZ, PhotonX, PhotonY, Ph_Conf, satellite_altitude):
     
@@ -288,7 +288,7 @@ def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azi
     
     # read photon ref_elev to get theta1
     # Does not account for curvature of Earth
-    theta1 = np.pi/2 - Photon_ref_elev
+    theta = np.pi/2 - Photon_ref_elev
     
     # H = orbital altitude of IS2 (496km as mean)
     # H = 496km. we pass in the mean of the orbit from /geolocation/altitude_sc/
@@ -299,7 +299,7 @@ def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azi
     # Re = Radius of Earth (6371km mean)
     Re = 6371
     
-    theta1 = np.arctan((H*np.tan(theta1))/Re)
+    theta1 = np.arctan((H*np.tan(theta))/Re)
     
     # eq 1. Theta2
     theta2 = np.arcsin(((n1*np.sin(theta1))/n2))
@@ -412,17 +412,16 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     '''Create figures'''
     
     # Create bins for latitude
-    x_axis_bins = np.linspace(binned_data.latitude.min(), binned_data.latitude.max(), len(sea_height))
+    x_bins = np.linspace(binned_data.latitude.min(), binned_data.latitude.max(), len(sea_height))
     
     # Create new dataframes for median values  
-    bath_median_values = {'x' : x_axis_bins ,'y' : bath_height}
-    bath_median_df = pd.DataFrame.from_dict(bath_median_values, orient='index')
+    bath_median_df = pd.DataFrame.from_dict({'x' : x_bins ,'y' : bath_height}, orient='index')
     bath_median_df = bath_median_df.transpose()
 
       
     # Create uniform sea surface based on median sea surface values and filter out surface breaching
-    sea_height1 = [np.nanmedian(sea_height) if i == i else np.nan for i in sea_height]
-    sea_median_df = pd.DataFrame({'x':x_axis_bins, 'y':sea_height1})
+    sea_surf = [np.nanmedian(sea_height) if i == i else np.nan for i in sea_height]
+    sea_median_df = pd.DataFrame({'x':x_bins, 'y':sea_surf})
 
     # Define figure size
     fig = plt.rcParams["figure.figsize"] = (40,5)
