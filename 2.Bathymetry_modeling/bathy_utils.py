@@ -208,10 +208,10 @@ def get_water_temp(data_path, latitude, longitude):
     '''
     # Get date from data filename
     file_date = data_path[-33:-25]
-    year = date[0:4]
-    month = date[4:6]
-    day = date[6:8]
-    julian_day = str(datetime.strptime(date, '%Y%m%d').timetuple().tm_yday)
+    year = file_date[0:4]
+    month = file_date[4:6]
+    day = file_date[6:8]
+    julian_day = str(datetime.strptime(file_date, '%Y%m%d').timetuple().tm_yday)
     # Add zero in front of day of year string
     zero_julian_date = julian_day.zfill(3)
 
@@ -229,21 +229,21 @@ def get_water_temp(data_path, latitude, longitude):
     lon_avg = longitude.mean()
     lon_min = -180
     lon_max = 180
-    scaledlon_min = 0
-    scaledlon_max = 35999
+    scaled_lon_min = 0
+    scaled_lon_max = 35999
 
-    new_lon = round(((lon_avg - lon_min) / (lon_max - lon_min)) * 
+    new_lon_ratio = round(((lon_avg - lon_min) / (lon_max - lon_min)) *
                     (scaled_lon_max - scaled_lon_min) + lon_min)
 
     # Access the SST data using the JPL OpenDap interface
     url = 'https://opendap.jpl.nasa.gov/opendap/OceanTemperature/ghrsst/data/GDS2/L4/GLOB/JPL/MUR/v4.1/'\
-        + str(year) + '/' + str(julian_day) + '/' + str(date) \
+        + str(year) + '/' + str(julian_day) + '/' + str(file_date) \
         + '090000-JPL-L4_GHRSST-SSTfnd-MUR-GLOB-v02.0-fv04.1.nc'
     
     dataset = netCDF4.Dataset(url)
     
     # Access the data and convert the temperature from K to C
-    sea_temp = dataset['analysed_sst'][0,scaled_lat, scaled_lon] - 273.15
+    sea_temp = dataset['analysed_sst'][0,new_lat_ratio, new_lon_ratio] - 273.15
     return sea_temp
 
 def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azimuth, PhotonZ, PhotonX, PhotonY, Ph_Conf, satellite_altitude):
@@ -460,7 +460,7 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
         
         # convert corrected locations back to wgs84 (useful to contain)
     transformer = Transformer.from_crs("EPSG:"+str(epsg_num), "EPSG:4326", always_xy=True)
-    print(transformer)
+    #print(transformer)
     lon_wgs84, lat_wgs84 = transformer.transform(geo_df.longitude.values, geo_df.latitude.values)
 
     geo_df['lon_wgs84'] = lon_wgs84
