@@ -288,7 +288,7 @@ def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azi
     
     # read photon ref_elev to get theta1
     # Does not account for curvature of Earth
-    theta = np.pi/2 - Photon_ref_elev
+    theta1 = np.pi/2 - Photon_ref_elev
     
     # H = orbital altitude of IS2 (496km as mean)
     # H = 496km. we pass in the mean of the orbit from /geolocation/altitude_sc/
@@ -299,7 +299,8 @@ def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azi
     # Re = Radius of Earth (6371km mean)
     Re = 6371
     
-    theta1 = np.arctan((H*np.tan(theta))/Re)
+    # remove as potentially more inaccurate of a correcttion
+    #theta1 = np.arctan((H*np.tan(theta_1))/Re)
     
     # eq 1. Theta2
     theta2 = np.arcsin(((n1*np.sin(theta1))/n2))
