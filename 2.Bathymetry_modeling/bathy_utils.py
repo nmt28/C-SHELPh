@@ -198,7 +198,7 @@ def get_sea_height(binned_data):
     
     return sea_height_1
 
-def get_water_temp(data_path, latitude, longitude):
+def get_water_temp_redacted(data_path, latitude, longitude):
     '''
     Pull down surface water temperature along the track from the JPL GHRSST opendap website.
     
@@ -245,6 +245,31 @@ def get_water_temp(data_path, latitude, longitude):
     # Access the data and convert the temperature from K to C
     sea_temp = dataset['analysed_sst'][0,new_lat_ratio, new_lon_ratio] - 273.15
     return sea_temp
+
+def get_water_temp(data_path, latitude, longitude):
+    '''
+    Pull down surface water temperature along the track from the MUR SST:
+    https://aws.amazon.com/marketplace/pp/prodview-kvgy4vkuhavsc?sr=0-3&ref_=beagle&applicationId=AWSMPContessa#overview.
+    '''
+    # Get date from data filename
+    file_date = data_path[-33:-25]
+    year = file_date[0:4]
+    month = file_date[4:6]
+    day = file_date[6:8]
+    is2_date = str(datetime.strptime(file_date, '%Y%m%d'))
+
+    # Calculate ratio of latitude from mid-point of IS2 track
+    lat_avg = latitude.mean()
+
+    # Calculate ratio of longitude from mid-point of IS2 track
+    lon_avg = longitude.mean()
+
+    sea_temp_xr = xr.open_zarr(fsspec.get_mapper('s3://mur-sst/zarr', anon=True),consolidated=True)
+
+    sst = round(sea_temp_xr['analysed_sst'].sel(time=slice(is2_date,is2_date),lat=lat_avg,lon=lon_avg).load().values[0]-273.15,2)
+    print(sst)
+
+    return sst
 
 def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azimuth, PhotonZ, PhotonX, PhotonY, Ph_Conf, satellite_altitude):
     
