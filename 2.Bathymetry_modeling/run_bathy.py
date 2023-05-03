@@ -136,15 +136,21 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 
     # Calculate sea temperature
     try:
-        sst_calculated = get_water_temp(args.input, latitude, longitude)
-    
-    except OSError:
-        sst_calculated = 20
-        
-    if 15 <= sst_calculated <= 30:
-        waterTemp = sst_calculated
-    else:
+        if args.waterTemp is not None:
+            waterTemp = args.waterTemp
+        else:
+            waterTemp = get_water_temp(args.input, latitude, longitude)
+    except Exception as e:
+        print('NO SST PROVIDED OF RETRIEVED: 20 deg 20 assigned')
         waterTemp = 20
+    
+    #except OSError:
+    #    sst_calculated = 20
+        
+    #if 15 <= sst_calculated <= 30:
+    #    waterTemp = sst_calculated
+    #else:
+    #    waterTemp = 20
 
     # Correct for refraction 
     print('refrac correction')
