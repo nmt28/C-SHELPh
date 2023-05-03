@@ -38,6 +38,8 @@ import geopandas
 import netCDF4
 from datetime import datetime
 import utm
+import xarray as xr
+import fsspec
 
 def ReadATL03(h5_file, laser_num):
     # Read File
