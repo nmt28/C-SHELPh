@@ -35,6 +35,7 @@ import utm
 import math
 import fiona
 import geopandas
+#import netCDF4
 from datetime import datetime
 import utm
 import xarray as xr
@@ -269,7 +270,7 @@ def get_water_temp(data_path, latitude, longitude):
     
     sea_temp = sea_temp_xr['analysed_sst'].sel(time=slice(start_date,end_date))
     
-    sst = sea_temp_tmp.sel(lat=lat_med,lon=lon_med,method='nearest').load().values[0] - 273
+    sst = sea_temp.sel(lat=lat_med,lon=lon_med,method='nearest').load().values[0] - 273
     
     return sst
 
