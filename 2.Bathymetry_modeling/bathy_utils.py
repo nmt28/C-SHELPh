@@ -258,8 +258,7 @@ def get_water_temp(data_path, latitude, longitude):
     
     start_date = str(datetime.strptime(file_date + ' 00:00:00', '%Y%m%d %H:%M:%S'))
     end_date = str(datetime.strptime(file_date + ' 23:59:59', '%Y%m%d %H:%M:%S'))
-    start_date
-    end_date
+
     # Calculate ratio of latitude from mid-point of IS2 track
     lat_med = np.median(latitude)
 
