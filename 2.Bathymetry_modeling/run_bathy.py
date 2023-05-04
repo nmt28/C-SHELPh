@@ -134,14 +134,14 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
     WSHeight = np.nanmedian(sea_height)
 
     # Calculate sea temperature
-    try:
-        if args.waterTemp is not None:
-            waterTemp = args.waterTemp
-        else:
+    if args.waterTemp is not None:
+        waterTemp = args.waterTemp
+    else:
+        try:
             waterTemp = get_water_temp(args.input, latitude, longitude)
-    except Exception as e:
-        print('NO SST PROVIDED OR RETRIEVED: 20 deg C assigned')
-        waterTemp = 20
+        except Exception as e:
+            print('NO SST PROVIDED OR RETRIEVED: 20 deg C assigned')
+            waterTemp = 20
         
     print("water temp:", waterTemp)
     
