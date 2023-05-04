@@ -36,7 +36,6 @@ import utm
 import math
 import fiona
 import geopandas
-import netCDF4
 from datetime import datetime
 # Import functions from utils.py
 from bathy_utils import *

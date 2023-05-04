@@ -35,7 +35,6 @@ import utm
 import math
 import fiona
 import geopandas
-import netCDF4
 from datetime import datetime
 import utm
 import xarray as xr
