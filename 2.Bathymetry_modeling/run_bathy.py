@@ -133,6 +133,10 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
     # Set sea height
     WSHeight = np.nanmedian(sea_height)
 
+    waterTemp = get_water_temp(args.input, latitude, longitude)
+    
+    print(waterTemp)
+    '''
     # Calculate sea temperature
     if args.waterTemp is not None:
         waterTemp = args.waterTemp
@@ -178,7 +182,7 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
     # Create figure
     plt.close()
     produce_figures(binned_data, bath_height, sea_height, 10, -20, args.thresh, file, geo_df, RefY, RefZ, args.laser, epsg_num)
-    
+    '''
 if __name__ == '__main__':
     main()
 
