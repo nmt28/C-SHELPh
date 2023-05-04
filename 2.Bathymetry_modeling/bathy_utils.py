@@ -269,7 +269,7 @@ def get_water_temp(data_path, latitude, longitude):
     
     sea_temp = sea_temp_xr['analysed_sst'].sel(time=slice(start_date,end_date))
     
-    sst = sea_temp.sel(lat=lat_med,lon=lon_med,method='nearest').load().values[0] - 273
+    sst = round(sea_temp.sel(lat=lat_med,lon=lon_med,method='nearest').load().values[0] - 273,2)
     
     return sst
 
