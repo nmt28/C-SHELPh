@@ -130,7 +130,7 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
     
     # Find mean sea height
     sea_height = get_sea_height(binned_data_sea)
-
+    
     # Set sea height
     WSHeight = np.nanmedian(sea_height)
 
@@ -141,7 +141,7 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
         else:
             waterTemp = get_water_temp(args.input, latitude, longitude)
     except Exception as e:
-        print('NO SST PROVIDED OF RETRIEVED: 20 deg 20 assigned')
+        print('NO SST PROVIDED OR RETRIEVED: 20 deg C assigned')
         waterTemp = 20
         
     print("water temp:", waterTemp)

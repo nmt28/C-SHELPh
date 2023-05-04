@@ -255,22 +255,23 @@ def get_water_temp(data_path, latitude, longitude):
     '''
     # Get date from data filename
     file_date = data_path[-33:-25]
-    year = file_date[0:4]
-    month = file_date[4:6]
-    day = file_date[6:8]
-    is2_date = str(datetime.strptime(file_date, '%Y%m%d'))
-
+    
+    start_date = str(datetime.strptime(file_date + ' 00:00:00', '%Y%m%d %H:%M:%S'))
+    end_date = str(datetime.strptime(file_date + ' 23:59:59', '%Y%m%d %H:%M:%S'))
+    start_date
+    end_date
     # Calculate ratio of latitude from mid-point of IS2 track
-    lat_avg = latitude.mean()
+    lat_med = np.median(latitude)
 
     # Calculate ratio of longitude from mid-point of IS2 track
-    lon_avg = longitude.mean()
+    lon_med = np.median(longitude)
 
     sea_temp_xr = xr.open_zarr(fsspec.get_mapper('s3://mur-sst/zarr', anon=True),consolidated=True)
-
-    sst = round(sea_temp_xr['analysed_sst'].sel(time=slice(is2_date,is2_date),lat=lat_avg,lon=lon_avg).load().values[0]-273.15,2)
-    print(sst)
-
+    
+    sea_temp = sea_temp_xr['analysed_sst'].sel(time=slice(start_date,end_date))
+    
+    sst = sea_temp_tmp.sel(lat=lat_med,lon=lon_med,method='nearest').load().values[0] - 273
+    
     return sst
 
 def RefractionCorrection(WTemp, WSmodel, Wavelength, Photon_ref_elev, Ph_ref_azimuth, PhotonZ, PhotonX, PhotonY, Ph_Conf, satellite_altitude):
