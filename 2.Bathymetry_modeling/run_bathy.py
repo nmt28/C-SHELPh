@@ -141,7 +141,7 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
             waterTemp = get_water_temp(args.input, latitude, longitude)
         except Exception as e:
             print('NO SST PROVIDED OR RETRIEVED: 20 deg C assigned')
-            waterTemp = 20
+            waterTemp = 20 
         
     print("water temp:", waterTemp)
     
