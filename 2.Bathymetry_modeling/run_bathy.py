@@ -48,7 +48,7 @@ def main():
     parser.add_argument("-o", "--output", type=str, required = False, help="Specify the output location")
     parser.add_argument("-lr", "--lat_res", type=float, default = 10, help="Specify the latitudinal resoltuion (normally 10)")
     parser.add_argument("-hr", "--h_res", type=float, default = 0.5, help="Specify the height resolution (normally 0.5)")
-    parser.add_argument("-wt", "--waterTemp", type=float, default = None, help="Specify the water temperature in degrees C")
+    parser.add_argument("-wt", "--waterTemp", type=float, default = None, required = False, help="Specify the water temperature in degrees C")
     parser.add_argument("-slat", "--start_lat", type=float, required = False, help="Specify the start latitude")
     parser.add_argument("-elat", "--end_lat", type=float, required = False, help="Specify the stop latitude")
     
@@ -60,9 +60,9 @@ def main():
     elif args.laser == None:
         print('MISSING LASER NUMBER')
         os._exit(1)
-    elif args.waterTemp == None:
-        print('MISSING WATER TEMP')
-        os._exit(1)
+    #elif args.waterTemp == None:
+    #    print('MISSING WATER TEMP')
+    #    os._exit(1)
     elif args.lat_res == None:
         print('MISSING LATITUDINAL RESOLUTION')
         os._exit(1)
