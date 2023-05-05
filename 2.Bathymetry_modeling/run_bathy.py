@@ -184,11 +184,11 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
     elif isinstance(args.threshlist, list)==True:
         for thresh in args.threshlist:
             print("using threshold:", str(thresh))
-            bath_height, geo_df = get_bath_height(binned_data, thresh, WSHeight, args.h_res)
+            bath_height, geo_df = get_bath_height(binned_data, int(thresh), WSHeight, args.h_res)
         
             # Create figure
             plt.close()
-            produce_figures(binned_data, bath_height, sea_height, 10, -20, thresh, file, geo_df, RefY, RefZ, args.laser, epsg_num)
+            produce_figures(binned_data, bath_height, sea_height, 10, -20, str(thresh), file, geo_df, RefY, RefZ, args.laser, epsg_num)
 
     
 if __name__ == '__main__':
