@@ -71,7 +71,7 @@ def main():
         print('MISSING HEIGHT RESOLUTION')
         os._exit(1)
     elif args.thresh == None:
-        if args.theshlist == None:
+        if args.threshlist == None:
             print('MISSING PERCENT THRESHOLD VALUE OR LIST')
             os._exit(1)
 #     elif args.output == None:
