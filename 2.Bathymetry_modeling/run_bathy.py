@@ -44,7 +44,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", type=str, help="Specify the input ICESAT H5 file")
     parser.add_argument("-l", "--laser", type=str, help="Specify the ICESAT-2 laser number (1, 2 or 3)")
-    parser.add_argument("-th", "--thresh", type=int, help="Specify the threshold percentage")
+    parser.add_argument("-th", "--thresh", type=int, default=None, help="Specify the threshold percentage")
+    parser.add_argument("-tl", "--threshlist", nargs='+', default=None, help="Specify a list of thresholds to trial")
     parser.add_argument("-o", "--output", type=str, required = False, help="Specify the output location")
     parser.add_argument("-lr", "--lat_res", type=float, default = 10, help="Specify the latitudinal resoltuion (normally 10)")
     parser.add_argument("-hr", "--h_res", type=float, default = 0.5, help="Specify the height resolution (normally 0.5)")
@@ -70,8 +71,9 @@ def main():
         print('MISSING HEIGHT RESOLUTION')
         os._exit(1)
     elif args.thresh == None:
-        print('MISSING PERCENT THRESHOLD')
-        os._exit(1)
+        if args.theshlist == None:
+            print('MISSING PERCENT THRESHOLD VALUE OR LIST')
+            os._exit(1)
 #     elif args.output == None:
 #         print('MISSING OUTPUT DIRECTORY')
 #         os._exit(1)
@@ -172,12 +174,22 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
     # Bin dataset again for bathymetry
     binned_data = bin_data(dataset_bath, args.lat_res, args.h_res)
     
-    # Find bathymetry 
-    bath_height, geo_df = get_bath_height(binned_data, args.thresh, WSHeight, args.h_res)
-    
-    # Create figure
-    plt.close()
-    produce_figures(binned_data, bath_height, sea_height, 10, -20, args.thresh, file, geo_df, RefY, RefZ, args.laser, epsg_num)
+    if isinstance(args.thresh, int) == True:
+        # Find bathymetry
+        bath_height, geo_df = get_bath_height(binned_data, args.thresh, WSHeight, args.h_res)
+        
+        # Create figure
+        plt.close()
+        produce_figures(binned_data, bath_height, sea_height, 10, -20, args.thresh, file, geo_df, RefY, RefZ, args.laser, epsg_num)
+    elif isinstance(args.threshlist, list)==True:
+        for thresh in args.threshlist
+            print("using threshold:", str(thresh))
+            bath_height, geo_df = get_bath_height(binned_data, thresh, WSHeight, args.h_res)
+        
+            # Create figure
+            plt.close()
+            produce_figures(binned_data, bath_height, sea_height, 10, -20, thresh, file, geo_df, RefY, RefZ, args.laser, epsg_num)
+
     
 if __name__ == '__main__':
     main()
