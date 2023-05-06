@@ -7,11 +7,12 @@
 ## Installation
 
 ### It is recommended that the dependancies are installed via:
-'''
+```
 conda install -c conda-forge geopandas utm numpy matplotlib s3fs xarray zarr pyproj proj-data h5py
 
 pip install cshelph
-'''
+
+```
 
 ## Using C-SHELPh
 
@@ -21,15 +22,15 @@ pip install cshelph
 * run_bathy_extraction.py: Automated runs of c-shelph for mass processing
 
 ### A simple use of C-SHELPh is:
-'''
+```
 python run_bathy_extraction.py -i icesat2_atl03_file.h5 -l 1 -th 20
-'''
+```
 ### where:
-'''
+```
 *    -i: the input ICESat2 ATL03 h5 file
 *    -l: laser number (1-3)
 *    -th: density threshold value (percentile; 0-100) which is used to change the sensitivity of the photon classification to noise
-'''
+```
 ### Additional options can be specifed to customize runs and override defaults (which are based on some underlying assumptions) 
 
 ## FAQs
