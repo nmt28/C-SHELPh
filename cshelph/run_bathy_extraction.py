@@ -48,13 +48,15 @@ def main():
     parser.add_argument("-i", "--input", type=str, help="Specify the input ICESAT H5 file")
     parser.add_argument("-l", "--laser", type=str, help="Specify the ICESAT-2 laser number (1, 2 or 3)")
     parser.add_argument("-th", "--thresh", type=int, default=None, help="Specify the threshold percentage")
-    parser.add_argument("-tl", "--threshlist", nargs='+', default=None, help="Specify a list of thresholds to trial")
+    parser.add_argument("-tl", "--threshlist", nargs='+', default=None, help="Specify a list of thresholds to trial e.g., -tl 20 25 30h")
     parser.add_argument("-o", "--output", type=str, required = False, help="Specify the output location")
     parser.add_argument("-lr", "--lat_res", type=float, default = 10, help="Specify the latitudinal resoltuion (normally 10)")
     parser.add_argument("-hr", "--h_res", type=float, default = 0.5, help="Specify the height resolution (normally 0.5)")
     parser.add_argument("-wt", "--water_temp", type=float, default = None, required = False, help="Specify the water temperature in degrees C")
     parser.add_argument("-slat", "--start_lat", type=float, required = False, help="Specify the start latitude")
     parser.add_argument("-elat", "--end_lat", type=float, required = False, help="Specify the stop latitude")
+    parser.add_argument("-minb", "--min_buffer", type=float, default = -40, required = False, help="Specify the stop latitude")
+    parser.add_argument("-maxb", "--max_buffer", type=float, default=5, required = False, help="Specify the stop latitude")
     
     args = parser.parse_args()
     
@@ -114,9 +116,20 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
     # Filter data that should not be analyzed
     # Filter for quality flags
     print('filter quality flags')
+    if args.minb == -40:
+        pass
+    else:
+        min_buffer = args.minb
+        
+    if args.maxb == 5:
+        pass
+    else:
+        max_buffer = args.maxb
+        
+        
     dataset_sea1 = dataset_sea[(dataset_sea.confidence != 0)  & (dataset_sea.confidence != 1)]
     # Filter for elevation range
-    dataset_sea1 = dataset_sea1[(dataset_sea1['photon_height'] > -40) & (dataset_sea1['photon_height'] < 5)]
+    dataset_sea1 = dataset_sea1[(dataset_sea1['photon_height'] > min_buffer) & (dataset_sea1['photon_height'] < max_buffer)]
     
     # Focus on specific latitude
     if args.start_lat is not None:
