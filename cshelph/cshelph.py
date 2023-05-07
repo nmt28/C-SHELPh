@@ -162,14 +162,14 @@ def bin_data(dataset, lat_res, height_res):
 
     return dataset1
 
-def get_sea_height(binned_data):
+def get_sea_height(binned_data, surface_buffer):
     '''Calculate mean sea height for easier calculation of depth and cleaner figures'''
     
     # Create sea height list
     sea_height = []
     
     # Group data by latitude
-    binned_data_sea = binned_data[(binned_data['photon_height'] > -0.5)] # Filter out subsurface data
+    binned_data_sea = binned_data[(binned_data['photon_height'] > surface_buffer)] # Filter out subsurface data
     grouped_data = binned_data_sea.groupby(['lat_bins'], group_keys=True)
     data_groups = dict(list(grouped_data))
     

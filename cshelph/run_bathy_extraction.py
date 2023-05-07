@@ -57,6 +57,7 @@ def main():
     parser.add_argument("-elat", "--end_lat", type=float, required = False, help="Specify the stop latitude")
     parser.add_argument("-minb", "--min_buffer", type=float, default = -40, required = False, help="Specify the stop latitude")
     parser.add_argument("-maxb", "--max_buffer", type=float, default=5, required = False, help="Specify the stop latitude")
+    parser.add_argument("-sb", "--surface_buffer", type=float, default=-0.5, required = False, help="Specify the point at which sea surface points are excluded")
     
     args = parser.parse_args()
     
@@ -116,15 +117,15 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
     # Filter data that should not be analyzed
     # Filter for quality flags
     print('filter quality flags')
-    if args.minb == -40:
-        pass
+    if args.min_buffer == -40:
+        min_buffer = -40
     else:
-        min_buffer = args.minb
+        min_buffer = args.min_buffer
         
-    if args.maxb == 5:
-        pass
+    if args.max_buffer == 5:
+        max_buffer = 5
     else:
-        max_buffer = args.maxb
+        max_buffer = args.max_buffer
         
         
     dataset_sea1 = dataset_sea[(dataset_sea.confidence != 0)  & (dataset_sea.confidence != 1)]
@@ -142,7 +143,11 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
     binned_data_sea = cshelph.bin_data(dataset_sea1, args.lat_res, args.h_res)
     
     # Find mean sea height
-    sea_height = cshelph.get_sea_height(binned_data_sea)
+    if args.surface_buffer==-0.5:
+        surface_buffer = -0.5
+    else:
+        surface_buffer = args.surface_buffer
+    sea_height = cshelph.get_sea_height(binned_data_sea, surface_buffer)
     
     # Set sea height
     med_water_surface_h = np.nanmedian(sea_height)
@@ -154,7 +159,7 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
         try:
             water_temp = cshelph.get_water_temp(args.input, latitude, longitude)
         except Exception as e:
-            print('NO SST pROVIDED OR RETRIEVED: 20 degrees C assigned')
+            print('NO SST PROVIDED OR RETRIEVED: 20 degrees C assigned')
             water_temp = 20
     
     print("water temp:", water_temp)
@@ -179,12 +184,14 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
     # Bin dataset again for bathymetry
     binned_data = cshelph.bin_data(dataset_bath, args.lat_res, args.h_res)
     
+    print("Locating bathymetric photons...")
     if isinstance(args.thresh, int) == True:
         # Find bathymetry
         bath_height, geo_df = cshelph.get_bath_height(binned_data, args.thresh, med_water_surface_h, args.h_res)
         
         # Create figure
         plt.close()
+        print('Creating figa nd writing to GPKG')
         cshelph.produce_figures(binned_data, bath_height, sea_height, 10, -20, args.thresh, file, geo_df, ref_y, ref_z, args.laser, epsg_num)
     elif isinstance(args.threshlist, list)==True:
         for thresh in args.threshlist:
@@ -193,6 +200,7 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
         
             # Create figure
             plt.close()
+            print('Creating figa nd writing to GPKG')
             cshelph.produce_figures(binned_data, bath_height, sea_height, 10, -20, str(thresh), file, geo_df, ref_y, ref_z, args.laser, epsg_num)
 
     
