@@ -2,21 +2,8 @@
 # coding: utf-8
 
 '''
-THE SOFTWARE IS pROVIDED \"AS IS\", WITHOUT WARRANTY OF An_y KIND, EXpRESS OR IMpLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A pARTICULAR pURpOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COpYRIGHT HOLDERS BE LIABLE FOR An_y CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'''
+THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXpRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'''
 
-#####
-# This group of functions processes ICESAT2 data and creates a bathymetric model.
-# To do this, it follows a number of steps in the form of functions, including:
-# 1. Reading data (ReadATL03())
-# 2. Orthometrically correcting the dataset (OrthometricCorrection())
-# 3. pulling down the data segment ID (getAtl03SegID())
-# 4. Bin the data along latitudinal and height gradients (bin_data())
-# 5. Calculate sea height (get_sea_height())
-# 6. Get water temperature (get_water_temp())
-# 7. Correct bathymetry surface for refraction (RefractionCorrection())
-# 8. Calculate bathymetry height (get_bath_height())
-# 9. produce figures (produce_figures())
-#####
 
 import numpy as np
 import h5py as h5
@@ -201,54 +188,6 @@ def get_sea_height(binned_data, surface_buffer):
     
     return sea_height_1
 
-def get_water_temp_redacted(data_path, latitude, longitude):
-    '''
-    pull down surface water temperature along the track from the JpL GHRSST opendap website.
-    
-    The GHRSST data are gridded tiles with dimension 17998 x 35999. 
-    To get the specific grid tile of the SST, you must convert from lat, lon coordinates
-    to the gridded tile ratio of the SST data product using the coordinates of the IS2 data.
-    '''
-    # Get date from data filename
-    file_date = data_path[-33:-25]
-    year = file_date[0:4]
-    month = file_date[4:6]
-    day = file_date[6:8]
-    julian_day = str(datetime.strptime(file_date, '%Y%m%d').timetuple().tm_yday)
-    # Add zero in front of day of year string
-    zero_julian_date = julian_day.zfill(3)
-
-    # Calculate ratio of latitude from mid-point of IS2 track
-    lat_avg = latitude.mean()
-    lat_min = -90
-    lat_max = 90
-    scaled_lat_min = 0
-    scaled_lat_max = 17998
-
-    new_lat_ratio = round(((lat_avg - lat_min) / (lat_max - lat_min)) * 
-                    (scaled_lat_max - scaled_lat_min) + scaled_lat_min)
-
-    # Calculate ratio of longitude from mid-point of IS2 track
-    lon_avg = longitude.mean()
-    lon_min = -180
-    lon_max = 180
-    scaled_lon_min = 0
-    scaled_lon_max = 35999
-
-    new_lon_ratio = round(((lon_avg - lon_min) / (lon_max - lon_min)) *
-                    (scaled_lon_max - scaled_lon_min) + lon_min)
-
-    # Access the SST data using the JpL OpenDap interface
-    url = 'https://opendap.jpl.nasa.gov/opendap/OceanTemperature/ghrsst/data/GDS2/L4/GLOB/JpL/MUR/v4.1/'\
-        + str(year) + '/' + str(julian_day) + '/' + str(file_date) \
-        + '090000-JpL-L4_GHRSST-SSTfnd-MUR-GLOB-v02.0-fv04.1.nc'
-    
-    dataset = netCDF4.Dataset(url)
-    
-    # Access the data and convert the temperature from K to C
-    sea_temp = dataset['analysed_sst'][0,new_lat_ratio, new_lon_ratio] - 273.15
-    return sea_temp
-
 def get_water_temp(data_path, latitude, longitude):
 
     try:
@@ -260,8 +199,8 @@ def get_water_temp(data_path, latitude, longitude):
     # Get date from data filename
     file_date = data_path[-33:-25]
     
-    start_date = str(datetime.strptime(file_date, '%Y%m%d'))
-    end_date = str(datetime.strptime(file_date, '%Y%m%d'))
+    date_range = file_date[0:4] + '-' + file_date[4:6] + '-' + file_date[6:]
+    
 
     location_df = pd.DataFrame({'longitude':longitude,'latitude':latitude})
     
@@ -277,7 +216,7 @@ def get_water_temp(data_path, latitude, longitude):
     Query = earthaccess.collection_query()
 
     # Use chain methods to customize our query
-    Query.keyword('GHRSST Level 4 CMC0.1deg Global Foundation Sea Surface Temperature Analysis').bounding_box(minx,miny,maxx,maxy).temporal(start_date,end_date)
+    Query.keyword('GHRSST Level 4 CMC0.1deg Global Foundation Sea Surface Temperature Analysis').bounding_box(minx,miny,maxx,maxy).temporal(date_range,date_range)
 
     collections = Query.fields(['ShortName','Version']).get(10)
 
@@ -490,16 +429,16 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     plt.xlim(left=binned_data.latitude.min(), right=binned_data.latitude.max())
     plt.ylim(top = y_limit_top, bottom = y_limit_bottom)
     
-    timestr = time.strftime("%Y%m%d_%H%M%S")
+    timestr = time.strftime("%Y%m%d%H%M%S")
     file = file.replace('.h5','')
     # Define where to save file
     plt.tight_layout()
-    plt.savefig(file + '_gt' + str(laser) + '_' + str(percentile) + '_EpSG' + str(epsg_num) + '_' + timestr + ".png")
+    plt.savefig(file + '_gt' + str(laser) + '_' + str(percentile) + '_EPSG' + str(epsg_num) + '_' + timestr + ".png")
     #plt.show()
     #plt.close()
         
         # convert corrected locations back to wgs84 (useful to contain)
-    transformer = Transformer.from_crs("EpSG:"+str(epsg_num), "EpSG:4326", always_xy=True)
+    transformer = Transformer.from_crs("EPSG:"+str(epsg_num), "EPSG:4326", always_xy=True)
     #print(transformer)
     lon_wgs84, lat_wgs84 = transformer.transform(geo_df.longitude.values, geo_df.latitude.values)
 
@@ -510,4 +449,4 @@ def produce_figures(binned_data, bath_height, sea_height, y_limit_top, y_limit_b
     
     geodf.set_crs(epsg=4326, inplace=True)
     
-    geodf.to_file(file + '_gt' + str(laser) + '_' + str(percentile) + '_EpSG' + str(epsg_num) + '_' + timestr + ".gpkg", driver="GPKG")
+    geodf.to_file(file + '_gt' + str(laser) + '_' + str(percentile) + '_EPSG' + str(epsg_num) + '_' + timestr + ".gpkg", driver="GPKG")
