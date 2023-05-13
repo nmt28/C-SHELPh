@@ -201,7 +201,6 @@ def get_water_temp(data_path, latitude, longitude):
     
     date_range = file_date[0:4] + '-' + file_date[4:6] + '-' + file_date[6:]
     
-
     location_df = pd.DataFrame({'longitude':longitude,'latitude':latitude})
     
     location_df = location_df.dropna(axis=0)
@@ -210,15 +209,11 @@ def get_water_temp(data_path, latitude, longitude):
     med_lat = np.nanmedian(location_df['latitude'])
     
     minx, miny, maxx, maxy = list(location_df.total_bounds)
-    
-    # The first step is to create a DataCollections query
 
     Query = earthaccess.collection_query()
 
     # Use chain methods to customize our query
     Query.keyword('GHRSST Level 4 CMC0.1deg Global Foundation Sea Surface Temperature Analysis').bounding_box(minx,miny,maxx,maxy).temporal(date_range,date_range)
-
-    collections = Query.fields(['ShortName','Version']).get(10)
 
     short_name = collections[0]["umm"]["ShortName"]
     
