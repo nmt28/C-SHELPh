@@ -8,7 +8,7 @@
 
 ### It is recommended that the dependancies are installed via:
 ```
-conda install -c conda-forge geopandas utm numpy matplotlib s3fs xarray zarr pyproj proj-data h5py
+conda install -c conda-forge geopandas utm numpy matplotlib s3fs xarray zarr pyproj proj-data h5py earthaccess h5netcdf dask
 
 pip install cshelph
 
@@ -46,5 +46,3 @@ python run_bathy_extraction.py -i icesat2_atl03_file.h5 -l 1 -th 20
 ## Additional notes
 
 ### Note: The refraction correction currently uses photon level metrics (photon azimuth, photon elevation, satellite elev) to get an as accurate bathymetric model as possible. This requires some assuptions about the spacecraft orbit (its vertical movements are a constant rate thus linear interpolation holds true) and geometry and radius of the Earth. Ultimately, the advantages of increased precision of this implementation are believed to outweigh uncertainty introduced by the assumption. The refraction correction follows that outlined by the excellent Parrish et al., 2019 publication: https://www.mdpi.com/2072-4292/11/14/1634
-
-
