@@ -37,6 +37,9 @@ from datetime import datetime
 import utm
 import xarray as xr
 import fsspec
+import earthaccess
+import geopandas
+
 # need s3fs installed
 
 def read_atl03(h5_file, laser_num):
@@ -247,27 +250,53 @@ def get_water_temp_redacted(data_path, latitude, longitude):
     return sea_temp
 
 def get_water_temp(data_path, latitude, longitude):
-    '''
-    pull down surface water temperature along the track from the MUR SST:
-    https://aws.amazon.com/marketplace/pp/prodview-kvgy4vkuhavsc?sr=0-3&ref_=beagle&applicationId=AWSMpContessa#overview.
-    '''
+
+    try:
+        auth = earthaccess.login(strategy="netrc")
+    except:
+        print("Login credentials not found. Sign in manually, your netrc file will be created for next time")
+        auth = earthaccess.login(strategy="interactive", persist=True)
+    
     # Get date from data filename
     file_date = data_path[-33:-25]
     
-    start_date = str(datetime.strptime(file_date + ' 00:00:00', '%Y%m%d %H:%M:%S'))
-    end_date = str(datetime.strptime(file_date + ' 23:59:59', '%Y%m%d %H:%M:%S'))
+    start_date = str(datetime.strptime(file_date, '%Y%m%d'))
+    end_date = str(datetime.strptime(file_date, '%Y%m%d'))
 
-    # Calculate ratio of latitude from mid-point of IS2 track
-    lat_med = np.median(latitude)
-
-    # Calculate ratio of longitude from mid-point of IS2 track
-    lon_med = np.median(longitude)
-
-    sea_temp_xr = xr.open_zarr(fsspec.get_mapper('s3://mur-sst/zarr', anon=True),consolidated=True)
+    location_df = pd.DataFrame({'longitude':longitude,'latitude':latitude})
     
-    sea_temp = sea_temp_xr['analysed_sst'].sel(time=slice(start_date,end_date))
+    location_df = location_df.dropna(axis=0)
     
-    sst = round(sea_temp.sel(lat=lat_med,lon=lon_med,method='nearest').load().values[0] - 273,2)
+    med_lon = np.nanmedian(location_df['longitude'])
+    med_lat = np.nanmedian(location_df['latitude'])
+    
+    minx, miny, maxx, maxy = list(location_df.total_bounds)
+    
+    # The first step is to create a DataCollections query
+
+    Query = earthaccess.collection_query()
+
+    # Use chain methods to customize our query
+    Query.keyword('GHRSST Level 4 CMC0.1deg Global Foundation Sea Surface Temperature Analysis').bounding_box(minx,miny,maxx,maxy).temporal(start_date,end_date)
+
+    collections = Query.fields(['ShortName','Version']).get(10)
+
+    short_name = collections[0]["umm"]["ShortName"]
+    
+    Query = earthaccess.granule_query().short_name(short_name).version("3.0").bounding_box(minx,miny,maxx,maxy).temporal("2020-01-01","2020-01-01")
+    
+    granules = Query.get(10)
+    
+    ds_L3 = xr.open_mfdataset(
+    earthaccess.open(granules),
+    combine='nested',
+    concat_dim='time',
+    coords='minimal',
+    )
+    
+    sea_temp = ds_L3['analysed_sst'].sel(lat=lat_med,lon=lon_med,method='nearest').load()
+    
+    sst = round(np.nanmedian(sea_temp.values)-273,2)
     
     return sst
 
