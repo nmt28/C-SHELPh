@@ -2,7 +2,7 @@
 # coding: utf-8
 
 '''
-THE SOFTWARE IS pROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXpRESS OR IMpLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A pARTICULAR pURpOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COpYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'''
+THE SOFTWARE IS pROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'''
 
 
 #####
@@ -39,14 +39,15 @@ import xarray
 import fsspec
 # This should work whether running cshelph from .py or if installed via pip
 import cshelph
+import earthaccess
 # need s3fs installed
 print("Packages imported")
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input", type=str, help="Specify the input ICESAT H5 file")
-    parser.add_argument("-l", "--laser", type=str, help="Specify the ICESAT-2 laser number (1, 2 or 3)")
+    parser.add_argument("-i", "--input", type=str, default=None, help="Specify the input ICESAT H5 file")
+    parser.add_argument("-l", "--laser", type=str, default=None, help="Specify the ICESAT-2 laser number (1, 2 or 3)")
     parser.add_argument("-th", "--thresh", type=int, default=None, help="Specify the threshold percentage")
     parser.add_argument("-tl", "--threshlist", nargs='+', default=None, help="Specify a list of thresholds to trial e.g., -tl 20 25 30h")
     parser.add_argument("-o", "--output", type=str, required = False, help="Specify the output location")
@@ -63,29 +64,23 @@ def main():
     
     if args.input == None:
         print('MISSING H5')
-        os._exit(1)
+        quit()
     elif args.laser == None:
         print('MISSING LASER NUMBER')
-        os._exit(1)
-    #elif args.water_temp == None:
-    #    print('MISSING WATER TEMp')
-    #    os._exit(1)
+        quit()
     elif args.lat_res == None:
         print('MISSING LATITUDINAL RESOLUTION')
-        os._exit(1)
+        quit()
     elif args.h_res == None:
         print('MISSING HEIGHT RESOLUTION')
-        os._exit(1)
+        quit()
     elif args.thresh == None:
         if args.threshlist == None:
-            print('MISSING pERCENT THRESHOLD VALUE OR LIST')
-            os._exit(1)
-#     elif args.output == None:
-#         print('MISSING OUTpUT DIRECTORY')
-#         os._exit(1)
+            print('MISSING PERCENT THRESHOLD VALUE OR LIST')
     
-    print('''
-THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''')
+    
+    
+    print('''THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''')
     
     # Read in the data
     latitude, longitude, photon_h, conf, ref_elev, ref_azimuth, ph_index_beg, segment_id, alt_sc, seg_ph_count = cshelph.read_atl03(args.input, args.laser)
@@ -161,6 +156,7 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
         except Exception as e:
             print('NO SST PROVIDED OR RETRIEVED: 20 degrees C assigned')
             water_temp = 20
+            raise e
     
     print("water temp:", water_temp)
 
@@ -191,7 +187,7 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
         
         # Create figure
         plt.close()
-        print('Creating figa nd writing to GPKG')
+        print('Creating figs and writing to GPKG')
         cshelph.produce_figures(binned_data, bath_height, sea_height, 10, -20, args.thresh, file, geo_df, ref_y, ref_z, args.laser, epsg_num)
     elif isinstance(args.threshlist, list)==True:
         for thresh in args.threshlist:
@@ -200,10 +196,10 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
         
             # Create figure
             plt.close()
-            print('Creating figa nd writing to GPKG')
+            print('Creating figs and writing to GPKG')
             cshelph.produce_figures(binned_data, bath_height, sea_height, 10, -20, str(thresh), file, geo_df, ref_y, ref_z, args.laser, epsg_num)
-
     
 if __name__ == '__main__':
     main()
+
 

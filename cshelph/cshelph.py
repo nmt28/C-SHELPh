@@ -25,8 +25,6 @@ import utm
 import xarray as xr
 import fsspec
 import earthaccess
-import geopandas
-
 # need s3fs installed
 
 def read_atl03(h5_file, laser_num):
@@ -205,28 +203,23 @@ def get_water_temp(data_path, latitude, longitude):
     
     location_df = location_df.dropna(axis=0)
     
-    med_lon = np.nanmedian(location_df['longitude'])
-    med_lat = np.nanmedian(location_df['latitude'])
+    minx, miny, maxx, maxy = np.min(location_df['longitude']), np.min(location_df['latitude']), np.max(location_df['longitude']), np.max(location_df['latitude'])
     
-    minx, miny, maxx, maxy = list(location_df.total_bounds)
+    lat_med = np.median(location_df['latitude'])
+    lon_med = np.median(location_df['longitude'])
 
     Query = earthaccess.collection_query()
 
     # Use chain methods to customize our query
-    Query.keyword('GHRSST Level 4 CMC0.1deg Global Foundation Sea Surface Temperature Analysis').bounding_box(minx,miny,maxx,maxy).temporal(date_range,date_range)
-
+    collections = Query.keyword('GHRSST Level 4 CMC0.1deg Global Foundation Sea Surface Temperature Analysis').bounding_box(minx,miny,maxx,maxy).temporal(date_range,date_range).get(10)
+    
     short_name = collections[0]["umm"]["ShortName"]
     
     Query = earthaccess.granule_query().short_name(short_name).version("3.0").bounding_box(minx,miny,maxx,maxy).temporal("2020-01-01","2020-01-01")
     
     granules = Query.get(10)
     
-    ds_L3 = xr.open_mfdataset(
-    earthaccess.open(granules),
-    combine='nested',
-    concat_dim='time',
-    coords='minimal',
-    )
+    ds_L3 = xr.open_mfdataset(earthaccess.open(granules),combine='nested',concat_dim='time',coords='minimal')
     
     sea_temp = ds_L3['analysed_sst'].sel(lat=lat_med,lon=lon_med,method='nearest').load()
     
