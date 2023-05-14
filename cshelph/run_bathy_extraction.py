@@ -156,7 +156,6 @@ def main():
         except Exception as e:
             print('NO SST PROVIDED OR RETRIEVED: 20 degrees C assigned')
             water_temp = 20
-            raise e
     
     print("water temp:", water_temp)
 
