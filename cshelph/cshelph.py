@@ -150,7 +150,7 @@ def bin_data(dataset, lat_res, height_res):
 
     return dataset1
 
-def get_sea_height(binned_data, surface_buffer):
+def get_sea_height(binned_data, surface_buffer=-0.5):
     '''Calculate mean sea height for easier calculation of depth and cleaner figures'''
     
     # Create sea height list

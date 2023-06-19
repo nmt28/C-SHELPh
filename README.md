@@ -8,7 +8,7 @@
 
 ### It is recommended that the dependancies are installed via:
 ```
-conda install -c conda-forge geopandas utm numpy matplotlib s3fs xarray zarr pyproj proj-data h5py earthaccess h5netcdf dask
+conda install -c conda-forge geopandas utm numpy matplotlib s3fs xarray zarr pyproj proj-data h5py earthaccess h5netcdf dask tqdm
 
 pip install cshelph
 

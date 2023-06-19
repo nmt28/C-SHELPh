@@ -142,6 +142,7 @@ def main():
         surface_buffer = -0.5
     else:
         surface_buffer = args.surface_buffer
+    
     sea_height = cshelph.get_sea_height(binned_data_sea, surface_buffer)
     
     # Set sea height
