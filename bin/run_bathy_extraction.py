@@ -136,7 +136,7 @@ def main():
         SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."""
     )
 
-    cshelph.run_cshelph.run_cshelp(
+    cshelph.run_cshelph.run_cshelph(
         args.input,
         args.laser,
         args.thresh,
