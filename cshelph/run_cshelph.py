@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-def run_cshelp(
+def run_cshelph(
     input_h5_file: str,
     laser_num: int,
     thresh: int,
