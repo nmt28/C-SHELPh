@@ -2,22 +2,13 @@
 # coding: utf-8
 
 """
-THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."""
-
-
-#####
-# This group of functions processes ICESAT2 data and creates a bathymetric model.
-# To do this, it follows a number of steps in the form of functions, including:
-# 1. Reading data (ReadATL03())
-# 2. Orthometrically correcting the dataset (OrthometricCorrection())
-# 3. pulling down the data segment ID (getAtl03SegID())
-# 4. Bin the data along latitudinal and height gradients (bin_data())
-# 5. Calculate sea height (get_sea_height())
-# 6. Get water temperature (get_water_temp())
-# 7. Correct bathymetry surface for refraction (RefractionCorrection())
-# 8. Calculate bathymetry height (get_bath_height())
-# 9. produce figures (produce_figures())
-#####
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
 
 import cshelph.run_cshelph
 import argparse
@@ -123,7 +114,8 @@ def main():
 
     if (args.thresh is None) and (args.threshlist is None):
         raise Exception(
-            "Must provide either a threshold percentage or a list of thresholds to test."
+            "Must provide either a threshold percentage or "
+            "a list of thresholds to test."
         )
 
     print(

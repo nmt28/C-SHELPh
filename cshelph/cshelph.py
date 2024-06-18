@@ -72,7 +72,7 @@ def convert_wgs_to_utm(lat, lon):
     elif letter < "N":
         epsg = "epsg:327" + str(num)
     else:
-        print("Error Finding UTM")
+        raise Exception("Error Finding UTM")
 
     return epsg
 
@@ -110,24 +110,24 @@ def ref_linear_interp(photon_count, ref_elev):
     arr = []
     for i in range(len(ref_elev)):
         try:
-            min = ref_elev[i - 1]
-            max = ref_elev[i]
+            min_val = ref_elev[i - 1]
+            max_val = ref_elev[i]
         except:
-            min = ref_elev[i]
-            max = ref_elev[i]
+            min_val = ref_elev[i]
+            max_val = ref_elev[i]
 
         try:
-            min = ref_elev[i]
-            max = ref_elev[i + 1]
+            min_val = ref_elev[i]
+            max_val = ref_elev[i + 1]
         except:
-            min = ref_elev[i]
-            max = ref_elev[i]
+            min_val = ref_elev[i]
+            max_val = ref_elev[i]
 
-        if min == max:
-            sub = np.full((photon_count[i]), min)
+        if min_val == max_val:
+            sub = np.full((photon_count[i]), min_val)
             arr.append(sub)
         else:
-            sub_tmp = np.linspace(min, max, photon_count[i] + 1)
+            sub_tmp = np.linspace(min_val, max_val, photon_count[i] + 1)
             if len(sub_tmp) > 1:
                 sub = np.linspace(sub_tmp[1], sub_tmp[-1], photon_count[i])
                 arr.append(sub)
@@ -150,7 +150,7 @@ def bin_data(dataset, lat_res, height_res):
     )
 
     # Duplicate dataframe
-    dataset1 = dataset
+    dataset1 = dataset.copy(deep=True)
 
     # Cut lat bins
     lat_bins = pd.cut(
@@ -233,7 +233,8 @@ def get_water_temp(data_path, latitude, longitude):
         auth = earthaccess.login(strategy="netrc")
     except:
         print(
-            "Login credentials not found. Sign in manually, your netrc file will be created for next time"
+            "Login credentials not found. Sign in manually, your "
+            "netrc file will be created for next time"
         )
         auth = earthaccess.login(strategy="interactive", persist=True)
 
@@ -519,7 +520,8 @@ def produce_figures(
     )
     bath_median_df = bath_median_df.transpose()
 
-    # Create uniform sea surface based on median sea surface values and filter out surface breaching
+    # Create uniform sea surface based on median sea surface values
+    # and filter out surface breaching
     sea_surf = [np.nanmedian(sea_height) if i == i else np.nan for i in sea_height]
     sea_median_df = pd.DataFrame({"x": x_bins, "y": sea_surf})
 
