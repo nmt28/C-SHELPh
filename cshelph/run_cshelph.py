@@ -32,6 +32,37 @@ def run_cshelph(
     max_buffer: float,
     surface_buffer: float,
 ):
+    """
+    This function runs a group of functions processes ICESAT2 data and
+    creates a bathymetric model.
+    
+    To do this, it follows a number of steps in the form of functions, including:
+        1. Reading data (ReadATL03())
+        2. Orthometrically correcting the dataset (OrthometricCorrection())
+        3. pulling down the data segment ID (getAtl03SegID())
+        4. Bin the data along latitudinal and height gradients (bin_data())
+        5. Calculate sea height (get_sea_height())
+        6. Get water temperature (get_water_temp())
+        7. Correct bathymetry surface for refraction (RefractionCorrection())
+        8. Calculate bathymetry height (get_bath_height())
+        9. produce figures (produce_figures())
+
+    :param input_h5_file:
+    :param laser_num:
+    :param thresh:
+    :param threshlist:
+    :param output:
+    :param lat_res:
+    :param h_res:
+    :param water_temp:
+    :param start_lat:
+    :param end_lat:
+    :param min_buffer:
+    :param max_buffer:
+    :param surface_buffer:
+    :return:
+    """
+
     # Read in the data
     (
         latitude,
@@ -49,11 +80,13 @@ def run_cshelph(
     # Find the epsg code
     epsg_code = cshelph.convert_wgs_to_utm(latitude[0], longitude[0])
     epsg_num = int(epsg_code.split(":")[-1])
+
     # Orthometrically correct the data using the epsg code
     lat_utm, lon_utm, photon_h = cshelph.orthometric_correction(
         latitude, longitude, photon_h, epsg_code
     )
-    # count number of photons in each segment: DEpRECATED
+
+    # count number of photons in each segment: DEPRECATED
     # ph_num_per_seg = count_ph_per_seg(ph_index_beg, photon_h)
     ph_num_per_seg = seg_ph_count[ph_index_beg > 0]
     # Cast as an int
@@ -61,7 +94,8 @@ def run_cshelph(
 
     # count_ph_per_seg() function removes zeros from ph_index_beg
     # These 0s are nodata vals in other params (ref_elev etc)
-    # Thus no pre-processing is needed as it will map correctly given the nodata values are eliminated
+    # Thus no pre-processing is needed as it will map correctly given
+    # the nodata values are eliminated
     ph_ref_elev = cshelph.ref_linear_interp(ph_num_per_seg, ref_elev[ph_index_beg > 0])
     ph_ref_azimuth = cshelph.ref_linear_interp(
         ph_num_per_seg, ref_azimuth[ph_index_beg > 0]
@@ -94,17 +128,6 @@ def run_cshelph(
     # plt.show()
     # Filter data that should not be analyzed
     # Filter for quality flags
-    print("filter quality flags")
-    if min_buffer == -40:
-        min_buffer = -40
-    else:
-        min_buffer = min_buffer
-
-    if max_buffer == 5:
-        max_buffer = 5
-    else:
-        max_buffer = max_buffer
-
     dataset_sea1 = dataset_sea[
         (dataset_sea.confidence != 0) & (dataset_sea.confidence != 1)
     ]
@@ -139,9 +162,7 @@ def run_cshelph(
     med_water_surface_h = np.nanmedian(sea_height)
 
     # Calculate sea temperature
-    if water_temp is not None:
-        water_temp = water_temp
-    else:
+    if water_temp is None:
         try:
             water_temp = cshelph.get_water_temp(input_h5_file, latitude, longitude)
         except Exception as e:
