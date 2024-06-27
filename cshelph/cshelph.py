@@ -36,20 +36,28 @@ def read_atl03(h5_file, laser_num):
     orientDict = {0: "l", 1: "r", 21: "error"}
     laser = "gt" + laser_num + orientDict[orientation]
 
+    laser_height_path = f"/{laser}/heights"
+    if laser_height_path not in f:
+        f.close()
+        raise Exception(
+            f"{laser_height_path} does not exist in file. "
+            f"It is likely that the file does not have any returns"
+        )
+
     # Read in the required photon level data
-    photon_h = f["/" + laser + "/heights/h_ph"][...,]
-    latitude = f["/" + laser + "/heights/lat_ph"][...,]
-    longitude = f["/" + laser + "/heights/lon_ph"][...,]
-    conf = f["/" + laser + "/heights/signal_conf_ph/"][..., 0]
+    photon_h = f[f"/{laser}/heights/h_ph"][...,]
+    latitude = f[f"/{laser}/heights/lat_ph"][...,]
+    longitude = f[f"/{laser}/heights/lon_ph"][...,]
+    conf = f[f"/{laser}/heights/signal_conf_ph/"][..., 0]
 
     # params needed for refraction correction
 
-    ref_elev = f["/" + laser + "/geolocation/ref_elev"][...,]
-    ref_azimuth = f["/" + laser + "/geolocation/ref_azimuth"][...,]
-    ph_index_beg = f["/" + laser + "/geolocation/ph_index_beg"][...,]
-    segment_id = f["/" + laser + "/geolocation/segment_id"][...,]
-    altitude_sc = f["/" + laser + "/geolocation/altitude_sc"][...,]
-    seg_ph_count = f["/" + laser + "/geolocation/segment_ph_cnt"][...,]
+    ref_elev = f[f"/{laser}/geolocation/ref_elev"][...,]
+    ref_azimuth = f[f"/{laser}/geolocation/ref_azimuth"][...,]
+    ph_index_beg = f[f"/{laser}/geolocation/ph_index_beg"][...,]
+    segment_id = f[f"/{laser}/geolocation/segment_id"][...,]
+    altitude_sc = f[f"/{laser}/geolocation/altitude_sc"][...,]
+    seg_ph_count = f[f"/{laser}/geolocation/segment_ph_cnt"][...,]
 
     return (
         latitude,
@@ -106,7 +114,6 @@ def count_ph_per_seg(ph_index_beg, photon_h):  # DEpRECATED
 
 
 def ref_linear_interp(photon_count, ref_elev):
-
     arr = []
     for i in range(len(ref_elev)):
         try:
