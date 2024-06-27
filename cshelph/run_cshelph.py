@@ -10,6 +10,7 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from typing import List
+import sys
 from cshelph import cshelph
 
 import numpy as np
@@ -64,18 +65,22 @@ def run_cshelph(
     """
 
     # Read in the data
-    (
-        latitude,
-        longitude,
-        photon_h,
-        conf,
-        ref_elev,
-        ref_azimuth,
-        ph_index_beg,
-        segment_id,
-        alt_sc,
-        seg_ph_count,
-    ) = cshelph.read_atl03(input_h5_file, laser_num)
+    try:
+        (
+            latitude,
+            longitude,
+            photon_h,
+            conf,
+            ref_elev,
+            ref_azimuth,
+            ph_index_beg,
+            segment_id,
+            alt_sc,
+            seg_ph_count,
+        ) = cshelph.read_atl03(input_h5_file, laser_num)
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
 
     # Find the epsg code
     epsg_code = cshelph.convert_wgs_to_utm(latitude[0], longitude[0])

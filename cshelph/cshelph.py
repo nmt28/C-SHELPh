@@ -10,6 +10,7 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
+import os
 import numpy as np
 import h5py as h5
 import matplotlib.pyplot as plt
@@ -26,6 +27,9 @@ import earthaccess
 
 
 def read_atl03(h5_file, laser_num):
+    if not os.path.exists(h5_file):
+        raise FileNotFoundError(f"Cannot find {h5_file} - check file path provided")
+    
     # Read File
     f = h5.File(h5_file, "r")
 
