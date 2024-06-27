@@ -38,7 +38,7 @@ def read_atl03(h5_file, laser_num):
 
     # selects the strong beams only [we can include weak beams later on]
     orientDict = {0: "l", 1: "r", 21: "error"}
-    laser = "gt" + laser_num + orientDict[orientation]
+    laser = f"gt{laser_num}{orientDict[orientation]}"
 
     laser_height_path = f"/{laser}/heights"
     if laser_height_path not in f:
