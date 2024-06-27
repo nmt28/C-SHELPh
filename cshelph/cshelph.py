@@ -29,7 +29,7 @@ import earthaccess
 def read_atl03(h5_file, laser_num):
     if not os.path.exists(h5_file):
         raise FileNotFoundError(f"Cannot find {h5_file} - check file path provided")
-    
+
     # Read File
     f = h5.File(h5_file, "r")
 
@@ -485,6 +485,9 @@ def get_bath_height(binned_data, percentile, WSHeight, height_resolution):
         else:
             bath_height.append(np.nan)
             del new_df
+
+    if len(geo_photon_height) == 0:
+        raise Exception("There are no geo photo heights.")
 
     geo_longitude_list = np.concatenate(geo_longitude).ravel().tolist()
     geo_latitude_list = np.concatenate(geo_latitude).ravel().tolist()

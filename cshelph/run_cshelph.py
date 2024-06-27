@@ -36,7 +36,7 @@ def run_cshelph(
     """
     This function runs a group of functions processes ICESAT2 data and
     creates a bathymetric model.
-    
+
     To do this, it follows a number of steps in the form of functions, including:
         1. Reading data (ReadATL03())
         2. Orthometrically correcting the dataset (OrthometricCorrection())
@@ -98,11 +98,53 @@ def run_cshelph(
         # These 0s are nodata vals in other params (ref_elev etc)
         # Thus no pre-processing is needed as it will map correctly given
         # the nodata values are eliminated
-        ph_ref_elev = cshelph.ref_linear_interp(ph_num_per_seg, ref_elev[ph_index_beg > 0])
+        ph_ref_elev = cshelph.ref_linear_interp(
+            ph_num_per_seg, ref_elev[ph_index_beg > 0]
+        )
         ph_ref_azimuth = cshelph.ref_linear_interp(
             ph_num_per_seg, ref_azimuth[ph_index_beg > 0]
         )
         ph_sat_alt = cshelph.ref_linear_interp(ph_num_per_seg, alt_sc[ph_index_beg > 0])
+
+        ###########################################################################
+        ########### Hacked Solution to Resolving Differences in Length ############
+        ###########################################################################
+        lat_utm_len = len(lat_utm)
+        lon_utm_len = len(lon_utm)
+        photon_h_len = len(photon_h)
+        conf_len = len(conf)
+        if (
+            (lat_utm_len != lon_utm_len)
+            and (conf_len != lon_utm_len)
+            and (conf_len != photon_h_len)
+        ):
+            raise Exception("lat_utm, lon_utm and conf_len must have same length")
+
+        ph_ref_elev_len = len(ph_ref_elev)
+        ph_ref_azimuth_len = len(ph_ref_azimuth)
+        ph_sat_alt_len = len(ph_sat_alt)
+
+        if (ph_ref_elev_len != ph_ref_azimuth_len) and (
+            ph_ref_azimuth_len != ph_sat_alt_len
+        ):
+            raise Exception(
+                "ph_ref_elev, ph_ref_azimuth and ph_sat_alt must have same length"
+            )
+
+        if lat_utm_len != ph_ref_elev_len:
+            if ph_ref_elev_len > lat_utm_len:
+                ph_ref_elev = ph_ref_elev[0:lat_utm_len]
+                ph_ref_azimuth = ph_ref_azimuth[0:lat_utm_len]
+                ph_sat_alt = ph_sat_alt[0:lat_utm_len]
+            elif lat_utm_len > ph_ref_elev_len:
+                lat_utm = lat_utm[0:ph_ref_elev_len]
+                lon_utm = lon_utm[0:ph_ref_elev_len]
+                photon_h = photon_h[0:ph_ref_elev_len]
+                conf = conf[0:ph_ref_elev_len]
+            else:
+                raise Exception("Interpolated variables do not have same length")
+        ###########################################################################
+        ###########################################################################
 
         # Aggregate data into dataframe
         dataset_sea = pd.DataFrame(
