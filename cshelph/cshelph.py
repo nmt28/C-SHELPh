@@ -10,6 +10,7 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
+import os
 import numpy as np
 import h5py as h5
 import matplotlib.pyplot as plt
@@ -26,6 +27,9 @@ import earthaccess
 
 
 def read_atl03(h5_file, laser_num):
+    if not os.path.exists(h5_file):
+        raise FileNotFoundError(f"Cannot find {h5_file} - check file path provided")
+
     # Read File
     f = h5.File(h5_file, "r")
 
@@ -34,22 +38,30 @@ def read_atl03(h5_file, laser_num):
 
     # selects the strong beams only [we can include weak beams later on]
     orientDict = {0: "l", 1: "r", 21: "error"}
-    laser = "gt" + laser_num + orientDict[orientation]
+    laser = f"gt{laser_num}{orientDict[orientation]}"
+
+    laser_height_path = f"/{laser}/heights"
+    if laser_height_path not in f:
+        f.close()
+        raise Exception(
+            f"{laser_height_path} does not exist in file. "
+            f"It is likely that the file does not have any returns"
+        )
 
     # Read in the required photon level data
-    photon_h = f["/" + laser + "/heights/h_ph"][...,]
-    latitude = f["/" + laser + "/heights/lat_ph"][...,]
-    longitude = f["/" + laser + "/heights/lon_ph"][...,]
-    conf = f["/" + laser + "/heights/signal_conf_ph/"][..., 0]
+    photon_h = f[f"/{laser}/heights/h_ph"][...,]
+    latitude = f[f"/{laser}/heights/lat_ph"][...,]
+    longitude = f[f"/{laser}/heights/lon_ph"][...,]
+    conf = f[f"/{laser}/heights/signal_conf_ph/"][..., 0]
 
     # params needed for refraction correction
 
-    ref_elev = f["/" + laser + "/geolocation/ref_elev"][...,]
-    ref_azimuth = f["/" + laser + "/geolocation/ref_azimuth"][...,]
-    ph_index_beg = f["/" + laser + "/geolocation/ph_index_beg"][...,]
-    segment_id = f["/" + laser + "/geolocation/segment_id"][...,]
-    altitude_sc = f["/" + laser + "/geolocation/altitude_sc"][...,]
-    seg_ph_count = f["/" + laser + "/geolocation/segment_ph_cnt"][...,]
+    ref_elev = f[f"/{laser}/geolocation/ref_elev"][...,]
+    ref_azimuth = f[f"/{laser}/geolocation/ref_azimuth"][...,]
+    ph_index_beg = f[f"/{laser}/geolocation/ph_index_beg"][...,]
+    segment_id = f[f"/{laser}/geolocation/segment_id"][...,]
+    altitude_sc = f[f"/{laser}/geolocation/altitude_sc"][...,]
+    seg_ph_count = f[f"/{laser}/geolocation/segment_ph_cnt"][...,]
 
     return (
         latitude,
@@ -106,7 +118,6 @@ def count_ph_per_seg(ph_index_beg, photon_h):  # DEpRECATED
 
 
 def ref_linear_interp(photon_count, ref_elev):
-
     arr = []
     for i in range(len(ref_elev)):
         try:
@@ -474,6 +485,9 @@ def get_bath_height(binned_data, percentile, WSHeight, height_resolution):
         else:
             bath_height.append(np.nan)
             del new_df
+
+    if len(geo_photon_height) == 0:
+        raise Exception("There are no geo photo heights.")
 
     geo_longitude_list = np.concatenate(geo_longitude).ravel().tolist()
     geo_latitude_list = np.concatenate(geo_latitude).ravel().tolist()

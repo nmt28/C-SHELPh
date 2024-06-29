@@ -12,6 +12,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import cshelph.run_cshelph
 import argparse
+import traceback
 
 
 def main():
@@ -109,6 +110,13 @@ def main():
         required=False,
         help="Specify the point at which sea surface points are excluded",
     )
+    parser.add_argument(
+            "--debug",
+            action="store_true",
+            default=False,
+            help="""If defined the debug mode will be activated,
+                    therefore intermediate files will not be deleted.""",
+    )
 
     args = parser.parse_args()
 
@@ -119,30 +127,35 @@ def main():
         )
 
     print(
-        """THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, 
-        EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-        MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-        IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
-        CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
-        TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
-        SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."""
+            ("THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\n" 
+        "EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF\n" 
+        "MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.\n"
+        "IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY\n" 
+        "CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,\n" 
+        "TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE\n" 
+        "SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n")
     )
 
-    cshelph.run_cshelph.run_cshelph(
-        args.input,
-        args.laser,
-        args.thresh,
-        args.threshlist,
-        args.output,
-        args.lat_res,
-        args.h_res,
-        args.water_temp,
-        args.start_lat,
-        args.end_lat,
-        args.min_buffer,
-        args.max_buffer,
-        args.surface_buffer,
-    )
+    try:
+        cshelph.run_cshelph.run_cshelph(
+            args.input,
+            args.laser,
+            args.thresh,
+            args.threshlist,
+            args.output,
+            args.lat_res,
+            args.h_res,
+            args.water_temp,
+            args.start_lat,
+            args.end_lat,
+            args.min_buffer,
+            args.max_buffer,
+            args.surface_buffer,
+        )
+    except Exception as e:
+        print(f"Error: {e}")
+        if args.debug:
+            traceback.print_exc()
 
 
 if __name__ == "__main__":
